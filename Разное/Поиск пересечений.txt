@@ -1,0 +1,300 @@
+
+(**************************************************************************************************)
+
+
+(*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*)
+
+ type
+    TAxisAngle = -90..90;
+    PPointDynArray =^TPointDynArray;
+    TPointDynArray = array of TPoint;
+    TRotateAxis = (raLeft, raCenter, raRight);
+
+  procedure ENumPoints(aX,aY : integer; aData : pointer);stdcall;
+  var
+   ind : integer;
+  begin
+  ind:=Length(PPointDynArray(aData)^);
+  Setlength(PPointDynArray(aData)^,ind+1);
+  PPointDynArray(aData)^[ind].X:=aX;
+  PPointDynArray(aData)^[ind].Y:=aY;
+  end;
+
+  function GetAllPoints(aBegin,aEnd : TPoint; var aPoints : TPointDynArray) : boolean;
+  begin
+  LineDDA(aBegin.x,aBegin.y,aEnd.x,aEnd.y,@ENumPoints,Integer(@aPoints));
+  Result:=true;
+
+  end;
+
+
+  function GetIntersect(aLineABegin,aLineAEnd,aLineBBegin,aLineBEnd : TPoint; var aIntPoints : TPointDynArray) : boolean;
+     function ExistsInArray(aPt : TPoint; const aPoints : TPointDynArray) : boolean;
+     var
+      cnt : integer;
+     begin
+     Result:=true;
+     for cnt:=0 to High(aPoints)
+       do if (aPt.x = apoints[cnt].x) and (aPt.y = apoints[cnt].y)
+             then Exit;
+     Result:=false;
+     end;
+  var
+   ptA : TPointDynArray;
+   ptB : TPointDynArray;
+   cntA : integer;
+   cntB : integer;
+   cntRes : integer;
+   //msg : string;
+  begin
+  //msg:='';
+  if GetAllPoints(aLineABegin,aLineAEnd,ptA) and
+     GetAllPoints(aLineBBegin,aLineBEnd,ptB)
+     then begin
+//     for cntA:=0 to High(ptA) do
+//     for cntB:=0  to High(ptB) do
+     for cntA:=1 to High(ptA)-1 do
+     for cntB:=1  to High(ptB)-1 do
+       begin
+       if (ptA[cntA].x = ptB[cntB].x) and (ptA[cntA].y = ptB[cntB].y)
+          and not ExistsInArray(ptA[cntA],aIntPoints)
+          then begin
+          cntRes:=Length(aIntPoints);
+          SetLength(aIntPoints,cntRes+1);
+          System.Move(ptA[cntA],aIntPoints[cntRes],SizeOf(TPoint));
+          //with aIntPoints[cntRes] do msg:=msg+Format('x:%d, y:%d',[x,y])+crlf;
+          end;
+       end;
+     end;
+  //if msg<>'' then ShowMessageInfo(msg);
+  end;
+
+type
+  TFloatLine  = record
+    A : TFloatPoint;
+    B : TFloatPoint;
+  end;
+
+procedure CheckFloatPolygon(const aPoints : array of TFloatPoint);
+var
+ lines : array of TFloatLine;
+ ptOne : TPointDynArray;
+ ptRes : TPointDynArray;
+ cnt : integer;
+ ind : integer;
+ aa : TPoint;
+ ab : TPoint;
+ ba : TPoint;
+ bb : TPoint;
+ indRes : integer;
+ msg : string;
+begin
+SetLength(lines,0);
+for cnt:=1 to High(aPoints)
+  do begin
+  ind:=Length(lines);
+  SetLength(lines,ind+1);
+  System.Move(aPoints[cnt-1], lines[ind].A, SizeOf(TFloatPoint));
+  System.Move(aPoints[cnt], lines[ind].B, SizeOf(TFloatPoint));
+  end;
+ind:=Length(lines);
+SetLength(lines,ind+1);
+System.Move(aPoints[High(aPoints)], lines[ind].A, SizeOf(TFloatPoint));
+System.Move(aPoints[0], lines[ind].B, SizeOf(TFloatPoint));
+//ShowMessageInfo(IntToStr(Length(lines)));
+ind:=0;
+SetLength(ptRes,0);
+while ind<High(lines) do
+  begin
+  for cnt:=ind+1 to High(lines)
+     do begin
+     with lines[ind] do
+        begin
+        aa:=Point(Trunc(A.X*1000000),Trunc(A.Y*1000000));
+        ab:=Point(Trunc(B.X*1000000),Trunc(B.Y*1000000));
+        end;
+     with lines[ind] do
+        begin
+        ba:=Point(Trunc(A.X*1000000),Trunc(A.Y*1000000));
+        bb:=Point(Trunc(B.X*1000000),Trunc(B.Y*1000000));
+        end;
+     SetLength(ptOne,0);
+     GetIntersect(aa,ab,ba,bb,ptOne);
+     if Length(ptOne)>0
+        then begin
+        indRes:=Length(ptRes);
+        ptRes[indRes].X:=ind;
+        ptRes[indRes].Y:=cnt;
+        end;
+     end;
+  inc(ind);
+  end;
+if Length(ptRes)>0
+   then begin
+   msg:='';
+   for cnt:=0 to High(ptRes) do with ptRes[cnt] do msg:=msg+Format('line# %d with line# %d',[x,y])+crlf;
+   ShowMessageInfo(msg);
+   end
+   else ShowMessageInfo('no intersections');
+
+
+end;
+
+
+
+
+
+var LL : array[0..3] of TFloatPoint =  (
+ (X:37.599583324045;  Y:55.7952459281205)
+,(X:37.7449490082192; Y:55.7763713760357)
+,(X:37.6512818831278; Y:55.7763713760357)
+,(X:37.6222395911137; Y:55.8265658097705));
+
+
+(**************************************************************************************************)
+
+
+
+(**************************************************************************************************)
+
+
+(*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*)
+
+
+type
+  PPointDynArray =^TPointDynArray;
+  TPointDynArray = array of TPoint;
+
+  PFloatLine = ^TFloatLine;
+  TFloatLine = record
+    A : TFloatPoint;
+    B : TFloatPoint;
+  end;
+
+function onSegment(p,q,r : TFloatPoint) : boolean;
+begin
+Result:=(q.x <= max(p.x, r.x))
+    and (q.x >= min(p.x, r.x))
+    and ((180-q.y) <= max((180-p.y), (180-r.y)))
+    and ((180-q.y) >= min((180-p.y), (180-r.y)))
+end;
+
+// To find orientation of ordered triplet (p, q, r).
+// The function returns following values
+// 0 --> p, q and r are colinear
+// 1 --> Clockwise
+// 2 --> Counterclockwise
+function orientation(p,q,r : TFloatPoint):integer;
+var
+ val : double;
+begin
+val := (q.y - (180-p.y)) * (r.x - q.x) - (q.x - p.x) * ((180-r.y) - (180-q.y));
+if val=0
+   then Result:=0// colinear
+   else
+if val>0
+   then Result:=1   // Clockwise
+   else Result:=2;  // Counterclockwise
+end;
+
+
+ // The main function that returns true if line segment 'p1q1'
+// and 'p2q2' intersect.
+function doIntersect(p1, q1, p2, q2 : TFloatPoint) : boolean;
+var
+o1,o2,o3,o4 : integer;
+begin
+// Find the four orientations needed for general and special cases
+o1 := orientation(p1, q1, p2);
+o2 := orientation(p1, q1, q2);
+o3 := orientation(p2, q2, p1);
+o4 := orientation(p2, q2, q1);
+
+// General case
+if (o1 <> o2) and (o3 <> o4)  then  Result:=True else
+// Special Cases
+// p1, q1 and p2 are colinear and p2 lies on segment p1q1
+if ((o1 = 0) and onSegment(p1, p2, q1)) then  Result:= True else
+// p1, q1 and q2 are colinear and q2 lies on segment p1q1
+if ((o2 = 0) and onSegment(p1, q2, q1)) then  Result:= True else
+// p2, q2 and p1 are colinear and p1 lies on segment p2q2
+if ((o3 = 0) and onSegment(p2, p1, q2)) then  Result:= True else
+// p2, q2 and q1 are colinear and q1 lies on segment p2q2
+if ((o4 = 0) and onSegment(p2, q1, q2)) then  Result:= True else
+Result:= False; // Doesn't fall in any of the above cases
+end;
+
+
+procedure CheckFloatPolygon(const aPoints : array of TFloatPoint);
+var
+ lines : array of TFloatLine;
+ ptRes : TPointDynArray;
+ cnt : integer;
+ ind : integer;
+ indRes : integer;
+ msg : string;
+begin
+SetLength(lines,0);
+for cnt:=0 to High(aPoints)-1
+  do begin
+  ind:=Length(lines);
+  SetLength(lines,ind+1);
+  System.Move(aPoints[cnt], lines[ind].A, SizeOf(TFloatPoint));
+  System.Move(aPoints[cnt+1], lines[ind].B, SizeOf(TFloatPoint));
+  end;
+ind:=Length(lines);
+SetLength(lines,ind+1);
+System.Move(aPoints[High(aPoints)], lines[ind].A, SizeOf(TFloatPoint));
+System.Move(aPoints[0], lines[ind].B, SizeOf(TFloatPoint));
+//ShowMessageInfo(IntToStr(Length(lines)));
+ind:=0;
+SetLength(ptRes,0);
+while ind<High(lines) do
+  begin
+  for cnt:=ind+1 to High(lines)
+     do begin
+     if doIntersect(lines[ind].A, lines[ind].B, lines[cnt].B, lines[cnt].A) and (cnt<>ind+1)
+        then begin
+        indRes:=Length(ptRes);
+        SetLength(ptRes, indRes+1);
+        ptRes[indRes].X:=ind;
+        ptRes[indRes].Y:=cnt;
+        end;
+     end;
+  inc(ind);
+  end;
+if Length(ptRes)>0
+   then begin
+   msg:='';
+   for cnt:=0 to High(ptRes) do with ptRes[cnt] do msg:=msg+Format('line# %d with line# %d',[x,y])+crlf;
+   ShowMessageInfo(msg);
+   end
+   else ShowMessageInfo('no intersections');
+end;
+
+var LL : array[0..4] of TFloatPoint =  (
+ (x:37.210073;y:55.797151)//	Следующая (2). Расстояние 26528 м  Направление 90°	Начальная точка
+,(x:37.633046;y:55.797924)//	Следующая (3). Расстояние 32317 м
+,(x:37.230672;y:55.617259)//	Следующая (4). Расстояние 26630 м
+//,(x:37.138661;y:55.731339)//
+//,(x:37.368001; y:55.865168)
+,(x:37.329549;	y:55.809526)
+//,(x: 37.547902; y:55.878294)
+,(x: 37.119435; y:55.833493)
+
+);
+
+
+//
+//var LL : array[0..3] of TFloatPoint =  (
+// (X:37.599583324045;  Y:55.7952459281205)
+//,(X:37.7449490082192; Y:55.7763713760357)
+//,(X:37.6512818831278; Y:55.7763713760357)
+//,(X:37.6222395911137; Y:55.8265658097705));
+
+
+(**************************************************************************************************)
+//intersect lines
+//http://stackoverflow.com/questions/563198/how-do-you-detect-where-two-line-segments-intersect
+//http://himangi774.blogspot.ru/2013_07_01_archive.html
+//https://toster.ru/q/74380

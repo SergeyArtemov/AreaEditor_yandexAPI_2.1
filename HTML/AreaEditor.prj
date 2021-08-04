@@ -1,0 +1,22 @@
+[Project ID]
+Signature=UE Proj: v.1
+[Project Information]
+Use Relative Directory=1
+Relative to Project File=1
+Include Sub Directories=1
+Project Tagfile=
+Project Wordfile=
+Project TpFile=
+Filter=
+Create Tagfile=0
+[Files]
+	0=Yandex_20140814.html
+	1=HtmlPages.rc
+	2=YG_viewer_20140725.html
+	3=YG_viewer_20140731.html
+	4=Yandex_20141107.html
+	5=Simple2_20140901.html
+	6=..\..\..\Projects NON Delphi\HTML_JS\Simple_Yandex_Map_1.html
+	7=..\Debug\Win32\AreaEditor.ini
+	8=..\..\..\Projects\_NEW4\any\yandex_Можайское_25.xml
+	9=Yandex_20151223.html

@@ -1,0 +1,30 @@
+unit TChangeAgentRuleEditorFrm;
+
+interface
+
+uses
+  Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
+  Dialogs, StdCtrls, Buttons;
+
+type
+  TTChangeAgentRuleEditorForm = class(TForm)
+    BitBtn1: TBitBtn;
+    BitBtn2: TBitBtn;
+    ComboBox1: TComboBox;
+    ComboBox2: TComboBox;
+    Label1: TLabel;
+    Label2: TLabel;
+  private
+    { Private declarations }
+  public
+    { Public declarations }
+  end;
+
+var
+  TChangeAgentRuleEditorForm: TTChangeAgentRuleEditorForm;
+
+implementation
+
+{$R *.dfm}
+
+end.

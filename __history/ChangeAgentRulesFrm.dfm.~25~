@@ -1,0 +1,135 @@
+object ChangeAgentRulesForm: TChangeAgentRulesForm
+  Left = 0
+  Top = 0
+  Caption = #1055#1088#1072#1074#1080#1083#1072' '#1089#1084#1077#1085#1099' '#1072#1075#1077#1085#1090#1086#1074
+  ClientHeight = 241
+  ClientWidth = 643
+  Color = clBtnFace
+  Font.Charset = DEFAULT_CHARSET
+  Font.Color = clWindowText
+  Font.Height = -11
+  Font.Name = 'Tahoma'
+  Font.Style = []
+  OldCreateOrder = False
+  OnShow = FormShow
+  DesignSize = (
+    643
+    241)
+  PixelsPerInch = 96
+  TextHeight = 13
+  object Label1: TLabel
+    Left = 111
+    Top = 6
+    Width = 103
+    Height = 13
+    Caption = #1055#1088#1086#1095#1080#1090#1072#1090#1100' '#1076#1072#1085#1085#1099#1077'  '
+  end
+  object sg: TStringGrid
+    Left = 0
+    Top = 29
+    Width = 635
+    Height = 212
+    Anchors = [akLeft, akTop, akRight, akBottom]
+    Color = clBtnFace
+    DefaultRowHeight = 18
+    FixedColor = clGradientInactiveCaption
+    RowCount = 2
+    Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goRangeSelect, goColSizing, goRowSelect]
+    PopupMenu = pm
+    TabOrder = 0
+    OnDblClick = miEditClick
+    OnDrawCell = sgDrawCell
+  end
+  object ToolBar: TToolBar
+    Left = 0
+    Top = 0
+    Width = 89
+    Height = 26
+    Align = alNone
+    ButtonHeight = 28
+    ButtonWidth = 26
+    Caption = 'ToolBar'
+    Images = _Main.IL_Paint
+    TabOrder = 1
+    object btnAdd: TToolButton
+      Left = 0
+      Top = 0
+      Hint = #1044#1086#1073#1072#1074#1080#1090#1100' '#1087#1088#1072#1074#1080#1083#1086
+      Caption = 'btnAdd'
+      ImageIndex = 0
+      ParentShowHint = False
+      ShowHint = True
+      OnClick = miAddClick
+    end
+    object btnEdit: TToolButton
+      Left = 26
+      Top = 0
+      Hint = #1048#1079#1084#1077#1085#1080#1090#1100
+      Caption = 'btnEdit'
+      ImageIndex = 37
+      ParentShowHint = False
+      ShowHint = True
+      OnClick = miEditClick
+    end
+    object btnDel: TToolButton
+      Left = 52
+      Top = 0
+      Hint = #1059#1076#1072#1083#1080#1090#1100
+      Caption = 'btnDel'
+      ImageIndex = 2
+      ParentShowHint = False
+      Wrap = True
+      ShowHint = True
+      OnClick = miDelClick
+    end
+  end
+  object cbDataSourse: TComboBox
+    Left = 222
+    Top = 2
+    Width = 259
+    Height = 21
+    Style = csDropDownList
+    TabOrder = 2
+  end
+  object ToolBar2: TToolBar
+    Left = 495
+    Top = 0
+    Width = 70
+    Height = 26
+    Align = alNone
+    ButtonHeight = 26
+    ButtonWidth = 26
+    Caption = 'ToolBar2'
+    Images = _Main.IL_Paint
+    TabOrder = 3
+    object btnRfillList: TToolButton
+      Left = 0
+      Top = 0
+      Hint = #1055#1088#1086#1095#1080#1090#1072#1090#1100' '#1076#1072#1085#1085#1099#1077
+      Caption = 'btnRfillList'
+      ImageIndex = 33
+      ParentShowHint = False
+      ShowHint = True
+      OnClick = btnRfillListClick
+    end
+  end
+  object pm: TPopupMenu
+    Left = 376
+    Top = 120
+    object miAdd: TMenuItem
+      Caption = #1044#1086#1073#1072#1074#1080#1090#1100
+      ShortCut = 45
+      OnClick = miAddClick
+    end
+    object miEdit: TMenuItem
+      Caption = #1048#1079#1084#1077#1085#1080#1090#1100
+      ShortCut = 16497
+      OnClick = miEditClick
+    end
+    object miDel: TMenuItem
+      Caption = #1059#1076#1072#1083#1080#1090#1100
+      ShortCut = 46
+      OnClick = miDelClick
+    end
+  end
+end

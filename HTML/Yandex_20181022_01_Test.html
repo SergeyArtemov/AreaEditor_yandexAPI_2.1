@@ -1,0 +1,642 @@
+<!DOCTYPE HTML>
+<html xmlns:vml="urn:schemas-microsoft-com:vml">
+<meta content="text/html; charset=windows-1251">
+<meta name="viewport" content="initial-scale=1.0, user-scalable=no, maximum-scale=1" />
+<!-- 20151223 -->
+<head> 	
+<style type="text/css">
+.fi80 {font-size: 80%;font-family: Verdana, Arial, Helvetica, sans-serif;color: #333366;font-style: italic}	
+.fi80red {font-size: 80%;font-family: Verdana, Arial, Helvetica, sans-serif;color: #FF0000;font-style: italic}
+.fn80 {font-size: 80%;font-family: Verdana, Arial, Helvetica, sans-serif;color: #333366;font-style: normal}
+.fi60 {font-size: 60%;font-family: Verdana, Arial, Helvetica, sans-serif;color: #333366;font-style: italic}
+.fn70 {font-size: 70%;font-family: Verdana, Arial, Helvetica, sans-serif;color: #333366;font-style: normal}
+</style>
+<style>
+html, body, #map {width: 100%; height: 100%; padding: 0; margin: 0;}
+</style>
+<script src="http://api-maps.yandex.ru/1.1/index.xml" type="text/javascript"></script>
+<!-- не удалять!!! это необходимо для расчета точек при создании зоны -->
+<script src="http://api-maps.yandex.ru/2.0/?load=package.standard&lang=ru-RU" type="text/javascript"></script>
+<script src="data.js" type="text/javascript"></script>
+<script type="text/javascript"> 
+//FieldsDelimiter  = '†';
+//RecordsDelimiter = '•';	
+GroupDelimiter = '†';
+//ItemDelimiter = '•';
+AreaDelimiter = '&';
+//crlf = '\n';	
+MapMode 		= 0; //  : 0- yandex
+CanAreaEdit = 1;
+var gpMoscowCenter = {lat:55.755833,lng:37.617778};
+var gpSPBCenter    = {lat:59.95,lng:30.316667} ;
+var gpRNDCenter    = {lat:47.23132,lng:39.72326} ;
+var map = null;	
+var PolygonList = [];
+var DeletedPolygonList = [];
+var MarkerList = [];
+var route = null;
+var InfoWindow = null;
+var placemark = null;
+var GreenMarkerIcon  = "data:image/gif;base64,R0lGODlhCgAKAHcAACH5BAUAABgALAAAAAAKAAoAhwD3AAiUCAicCAitCAjWCBj/GCGcISG9ISHWISnvKTk5OUqcSkr/SlpaWlreWnNzc3t7e4yMjJTWlJycnKWlxq2tra3Orb3evcb//9bn1v///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////whUADFgsGAggEELAjEYcCABwYCHAgYu0JBBAoGLBA4EOCDhggMCAAAUQBBgAAIEIUUySFDyokoGK1u+hJnAwgACBWDqPKAQQQKdDBAkNOAzAQKeGAICADs=";
+var YellowMarkerIcon = "data:image/gif;base64,R0lGODlhCgAKAHcAACH5BAUAAA4ALAAAAAAKAAoAhzk5OVpaWnNzc3t7e4yMjJSECJyMCJyMIZyUSpycnKWlxq2cCK2trb2lIcb//87Orda1CNa9IdbOlN7OWt7evefn1u/WKffWAP/nGP/vSv///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////whUAB04eHCggMEHAh0cmCAhwoKHBgYi0FBBAoSLEBoUaCCBwgQIFy5giFBgQYQIIUVmsFDyosoMK1u+hGnhwQIIGGDqbKAwggWdGSIkPODTQgSeDgICADs=";
+var RedMarkerIcon 	 = "data:image/gif;base64,R0lGODlhCgAKAHcAACH5BAUAANEALAAAAAAKAAoAhwAAAAAAMwAAZgAAmQAAzAAA/wArAAArMwArZgArmQArzAAr/wBVAABVMwBVZgBVmQBVzABV/wCAAACAMwCAZgCAmQCAzACA/wCqAACqMwCqZgCqmQCqzACq/wDVAADVMwDVZgDVmQDVzADV/wD/AAD/MwD/ZgD/mQD/zAD//zMAADMAMzMAZjMAmTMAzDMA/zMrADMrMzMrZjMrmTMrzDMr/zNVADNVMzNVZjNVmTNVzDNV/zOAADOAMzOAZjOAmTOAzDOA/zOqADOqMzOqZjOqmTOqzDOq/zPVADPVMzPVZjPVmTPVzDPV/zP/ADP/MzP/ZjP/mTP/zDP//2YAAGYAM2YAZmYAmWYAzGYA/2YrAGYrM2YrZmYrmWYrzGYr/2ZVAGZVM2ZVZmZVmWZVzGZV/2aAAGaAM2aAZmaAmWaAzGaA/2aqAGaqM2aqZmaqmWaqzGaq/2bVAGbVM2bVZmbVmWbVzGbV/2b/AGb/M2b/Zmb/mWb/zGb//5kAAJkAM5kAZpkAmZkAzJkA/5krAJkrM5krZpkrmZkrzJkr/5lVAJlVM5lVZplVmZlVzJlV/5mAAJmAM5mAZpmAmZmAzJmA/5mqAJmqM5mqZpmqmZmqzJmq/5nVAJnVM5nVZpnVmZnVzJnV/5n/AJn/M5n/Zpn/mZn/zJn//8wAAMwAM8wAZswAmcwAzMwA/8wrAMwrM8wrZswrmcwrzMwr/8xVAMxVM8xVZsxVmcxVzMxV/8yAAMyAM8yAZsyAmcyAzMyA/8yqAMyqM8yqZsyqmcyqzMyq/8zVAMzVM8zVZszVmczVzMzV/8z/AMz/M8z/Zsz/mcz/zMz///8AAP8AM/8AZv8Amf8AzP8A//8rAP8rM/8rZv8rmf8rzP8r//9VAP9VM/9VZv9Vmf9VzP9V//+AAP+AM/+AZv+Amf+AzP+A//+qAP+qM/+qZv+qmf+qzP+q///VAP/VM//VZv/Vmf/VzP/V////AP//M///Zv//mf//zP///wAAAAAAAAAAAAAAAAhWAKNFG/bHj8FhAqP9ATds2h9UBQca2jdvWCpUF1P5STVsmLZU00JqxAgylbRp2qb5+XMxpDZw2rJtROVSm81pwzZOg2nzY7RCIHv6FPjn1bRsqV4JDAgAOw==";
+var BlueMarkerIcon 	 = "data:image/gif;base64,R0lGODlhCgAKAHcAACH5BAUAABgALAAAAAAKAAoAhwAA9wgIlAgInAgIrQgI1hgY/yEhnCEhvSEh1ikp7zk5OUpKnEpK/1paWlpa3nNzc3t7e4yMjJSU1pycnKWlxq2tra2tzr293sb//9bW5////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////whUADFgsGAggEELAjEYcCABwYCHAgYu0JBBAoGLBA4EOCDhggMCAAAUQBBgAAIEIUUySFDyokoGK1u+hJnAwgACBWDqPKAQQQKdDBAkNOAzAQKeGAICADs="
+var VioletMarkerIcon = "data:image/gif;base64,R0lGODlhCgAKAHcAACH5BAUAAAAALAAAAAAKAAoAhwAAAJkAAMwAAP8AAJkAmcwAmf8AmZkAzP8AzMwrzP+AzP///wAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAhNAAEASEAggMEEAgEQQJDAAAEBBQceWKAgQQEBFwsEKJAgAYICBkJqxAiywAADCAwEIHAxJIKXKluifJkywcaZNAsoBEnzY0KWInUCCAgAOw==";
+ipID 				= 0;
+ipParentID	= 1;
+ipName 			= 2; 
+ipLevel 		= 3;
+ipLineColor	= 4;
+ipFillColor	= 5;
+ipRoute 		= 6;
+ipSessionID = 7;
+comZOrder = 0;
+/*
+areas=[{id:366,parentid:0,level:2,name:"\u041C\u043E\u0441\u043A\u0432\u0430\u002E\u0020\u0422\u0422\u041A",rgbline:"\u0046\u0046\u0030\u0030\u0030\u0030",rgbfill:"\u0038\u0030\u0046\u0046\u0038\u0030",routenum:0,latlngarr:[{lat:55.79342302795690,lng:37.61554632335900},{lat:55.79249161775070,lng:37.62822076678280},{lat:55.79183247709770,lng:37.63412883505230},{lat:55.79247008417380,lng:37.63974370434880},{lat:55.79375593887370,lng:37.64718599617480},{lat:55.79343181117520,lng:37.65150787308810},{lat:55.79220591910100,lng:37.65444137156010},{lat:55.78487072393130,lng:37.66406195238240},{lat:55.78129934637700,lng:37.66964480280880},{lat:55.77927559304160,lng:37.67471250146630},{lat:55.77604762928430,lng:37.68217524513600},{lat:55.77177258516270,lng:37.68813829869030},{lat:55.77007473957180,lng:37.69115259870890},{lat:55.76815917592710,lng:37.69223554059860},{lat:55.76604599261530,lng:37.69283082336190},{lat:55.75851254116010,lng:37.69265346229080},{lat:55.75543089362600,lng:37.69342023879290},{lat:55.75330907606210,lng:37.69453318789600},{lat:55.74917420512140,lng:37.69835131242870},{lat:55.74792961109890,lng:37.69957372918730},{lat:55.74668507175930,lng:37.70010933279990},{lat:55.74235185002030,lng:37.69769618287690},{lat:55.73952531231060,lng:37.69735051319010},{lat:55.73708597210330,lng:37.69837796688080},{lat:55.73368698349780,lng:37.70176710560920},{lat:55.72944010010000,lng:37.70682977512480},{lat:55.72470835004630,lng:37.71262217313050},{lat:55.72365248270300,lng:37.71232143044470},{lat:55.72283880192790,lng:37.71116238087420},{lat:55.71875613815360,lng:37.69769752398130},{lat:55.71748984622780,lng:37.69130850210790},{lat:55.71530293055320,lng:37.68358893692500},{lat:55.71371551803100,lng:37.67982847988610},{lat:55.71241300401320,lng:37.67485834658150},{lat:55.70970515328840,lng:37.66950180754070},{lat:55.70350073785990,lng:37.65824709087610},{lat:55.70313723376930,lng:37.65577459707860},{lat:55.70329475262550,lng:37.64938842505220},{lat:55.70460940436440,lng:37.63559533283120},{lat:55.70573015533580,lng:37.62304661795500},{lat:55.70561505266940,lng:37.62064101174480},{lat:55.70479720812990,lng:37.61844981461760},{lat:55.70170135941460,lng:37.61404847726230},{lat:55.70115153273850,lng:37.61233672499660},{lat:55.70089252078620,lng:37.60993815958500},{lat:55.70134465456350,lng:37.60736558586360},{lat:55.70591643919280,lng:37.59106010198600},{lat:55.70736200189980,lng:37.58565511554480},{lat:55.71414195105670,lng:37.57720196619630},{lat:55.71724182532280,lng:37.57122633978730},{lat:55.72068057312170,lng:37.56001504138110},{lat:55.72293218685390,lng:37.55236571654680},{lat:55.73167408520150,lng:37.54364334046840},{lat:55.73410667101080,lng:37.54265176132320},{lat:55.74018950284360,lng:37.53496773540980},{lat:55.74561968339850,lng:37.53331499174240},{lat:55.75100079187820,lng:37.53110418096190},{lat:55.75860754189970,lng:37.53378588706260},{lat:55.76621280218800,lng:37.53732573241000},{lat:55.76869312398830,lng:37.53927133977410},{lat:55.76983650416890,lng:37.54153160378340},{lat:55.77084358451170,lng:37.54309097304940},{lat:55.77313727145960,lng:37.54507228732110},{lat:55.77452591004630,lng:37.55310097709300},{lat:55.77628450377640,lng:37.55488380789760},{lat:55.78035640250290,lng:37.55869338288910},{lat:55.78582621596920,lng:37.56566226482390},{lat:55.79170421773490,lng:37.57455395534640},{lat:55.79208002213550,lng:37.58861292153600},{lat:55.79207454423870,lng:37.59581398218870}],sessionid:""},{id:254,parentid:0,level:2,name:"\u041C\u043E\u0441\u043A\u043E\u0432\u0441\u043A\u0430\u044F\u0020\u041A\u043E\u043B\u044C\u0446\u0435\u0432\u0430\u044F\u0020\u0410\u0432\u0442\u043E\u043C\u043E\u0431\u0438\u043B\u044C\u043D\u0430\u044F\u0020\u0414\u043E\u0440\u043E\u0433\u0430",rgbline:"\u0046\u0046\u0030\u0030\u0030\u0030",rgbfill:"\u0030\u0030\u0046\u0046\u0030\u0030",routenum:0,latlngarr:[{lat:55.77695544317194,lng:37.84268427443081},{lat:55.77426545545465,lng:37.84303365146153},{lat:55.77286608723356,lng:37.84317525521161},{lat:55.77115526510448,lng:37.84329697650503},{lat:55.76803617465779,lng:37.84318809208367},{lat:55.75912787158121,lng:37.84264194352531},{lat:55.75495543671956,lng:37.84242137532426},{lat:55.74897884345778,lng:37.84217529364271},{lat:55.74122221678685,lng:37.84171047494456},{lat:55.73471602873546,lng:37.84094088735108},{lat:55.72997953988488,lng:37.84042233880473},{lat:55.72094183550830,lng:37.83926273855636},{lat:55.71546354695915,lng:37.83847617163772},{lat:55.71463859155857,lng:37.83833559660785},{lat:55.71302445854643,lng:37.83776474469170},{lat:55.71002880074225,lng:37.83614278060938},{lat:55.70706913834558,lng:37.83448931250764},{lat:55.70230501350254,lng:37.83197061213220},{lat:55.69958491231855,lng:37.83064347640041},{lat:55.69813436049426,lng:37.83004318639850},{lat:55.69685626144931,lng:37.82973541669898},{lat:55.69493965165628,lng:37.82945106586327},{lat:55.69263327261600,lng:37.82932250479503},{lat:55.69055659477807,lng:37.82948716959838},{lat:55.68806503898444,lng:37.83016168210145},{lat:55.68253175081748,lng:37.83227608289294},{lat:55.67907468715113,lng:37.83354897014900},{lat:55.67410401691795,lng:37.83547699173056},{lat:55.66961225178563,lng:37.83710399814561},{lat:55.66516596960842,lng:37.83868421008093},{lat:55.66288080454737,lng:37.83942500428535},{lat:55.66144847197275,lng:37.83959807323262},{lat:55.65999113822215,lng:37.83967417446867},{lat:55.65839373547475,lng:37.83942629954711},{lat:55.65681187049045,lng:37.83904986518891},{lat:55.65532459473418,lng:37.83841720948395},{lat:55.65383795749028,lng:37.83748591233294},{lat:55.65236322080194,lng:37.83640278719865},{lat:55.65122390833978,lng:37.83526003719537},{lat:55.64962617121499,lng:37.83349931436678},{lat:55.64835455486176,lng:37.83172098209751},{lat:55.64640068349591,lng:37.82865652729592},{lat:55.64461430723920,lng:37.82592804454676},{lat:55.64077412357192,lng:37.82002526338441},{lat:55.63539437673472,lng:37.81172050094035},{lat:55.62920387687220,lng:37.80225821333772},{lat:55.62680719372980,lng:37.79873049786195},{lat:55.62507451382066,lng:37.79603763140882},{lat:55.62345616877418,lng:37.79310457447350},{lat:55.62127584366106,lng:37.78903917210644},{lat:55.62019639465180,lng:37.78664753869457},{lat:55.61933340164243,lng:37.78493600629277},{lat:55.61804166919490,lng:37.78273228651098},{lat:55.61638325665427,lng:37.77969787175054},{lat:55.61433306547050,lng:37.77601126111993},{lat:55.61098025308195,lng:37.76994455727858},{lat:55.60701925931966,lng:37.76273410728715},{lat:55.60310173306123,lng:37.75559066340726},{lat:55.60157162182615,lng:37.75251758097642},{lat:55.60059911621577,lng:37.75028751289410},{lat:55.59892459782594,lng:37.74632334967195},{lat:55.59661902559626,lng:37.74084918468375},{lat:55.59459922080295,lng:37.73602523095350},{lat:55.59183162283559,lng:37.72933264097424},{lat:55.58990354999570,lng:37.72490069165902},{lat:55.58828117122948,lng:37.72102738356421},{lat:55.58720103197123,lng:37.71825133289470},{lat:55.58509007024690,lng:37.71254910867168},{lat:55.58291373986720,lng:37.70670274359621},{lat:55.57969985519297,lng:37.69809414927711},{lat:55.57798545797268,lng:37.69348988423539},{lat:55.57680081148034,lng:37.69024175046410},{lat:55.57595036172202,lng:37.68798380955866},{lat:55.57447220134266,lng:37.68405662507935},{lat:55.57339863507217,lng:37.68039141305701},{lat:55.57264853305249,lng:37.67635371043565},{lat:55.57208139089916,lng:37.67185269686134},{lat:55.57198588268739,lng:37.66750975918743},{lat:55.57210725211490,lng:37.66347590641855},{lat:55.57256807242575,lng:37.65523964482922},{lat:55.57302639579719,lng:37.64766739567010},{lat:55.57361699937707,lng:37.63813465228195},{lat:55.57409510897357,lng:37.62960006342676},{lat:55.57483667465665,lng:37.61744621032135},{lat:55.57550406359947,lng:37.60541602980163},{lat:55.57584457171041,lng:37.60012036254079},{lat:55.57603550060172,lng:37.59644123470324},{lat:55.57637082771787,lng:37.59308635210189},{lat:55.57714921255985,lng:37.58889192801168},{lat:55.57883393138324,lng:37.58179113742408},{lat:55.58057637374430,lng:37.57466501143432},{lat:55.58212832418499,lng:37.56816551806011},{lat:55.58465837959027,lng:37.55754672822049},{lat:55.58766704572734,lng:37.54494792748029},{lat:55.59131923837501,lng:37.52977591798259},{lat:55.59371087252367,lng:37.51982286125583},{lat:55.59534407144585,lng:37.51386859753936},{lat:55.59723323528328,lng:37.50950650362292},{lat:55.59909289691982,lng:37.50622128520065},{lat:55.60187546011384,lng:37.50272452821349},{lat:55.60500280726270,lng:37.49910265443972},{lat:55.60727793488849,lng:37.49646930834641},{lat:55.61033027593633,lng:37.49294173114593},{lat:55.61417891958821,lng:37.48839678908550},{lat:55.61635070316496,lng:37.48590581582153},{lat:55.61841271317530,lng:37.48345195493678},{lat:55.62094059236030,lng:37.48045516562168},{lat:55.62385906016965,lng:37.47709774340748},{lat:55.62526835260692,lng:37.47543977262181},{lat:55.62732592377726,lng:37.47310658487994},{lat:55.62904118922733,lng:37.47103428717959},{lat:55.63190447038149,lng:37.46769151462220},{lat:55.63436357108713,lng:37.46482874917827},{lat:55.63674101052913,lng:37.46211220991928},{lat:55.63845494822348,lng:37.46008452017144},{lat:55.64181138124376,lng:37.45609001077284},{lat:55.64508095879083,lng:37.45232917394556},{lat:55.64823345933960,lng:37.44854310940575},{lat:55.65166804202281,lng:37.44465968300000},{lat:55.65373041341420,lng:37.44197157700542},{lat:55.65658508156613,lng:37.43858751537321},{lat:55.65922676198844,lng:37.43549337101656},{lat:55.66198264263337,lng:37.43261590503377},{lat:55.66416296695238,lng:37.43066965420315},{lat:55.66777697707207,lng:37.42797961548648},{lat:55.67175231691027,lng:37.42499997441509},{lat:55.67920390490966,lng:37.41943822938831},{lat:55.68294567536263,lng:37.41665848388639},{lat:55.68583386357513,lng:37.41540207072370},{lat:55.68774611611830,lng:37.41469811488697},{lat:55.68942002386708,lng:37.41387357394380},{lat:55.69121385514595,lng:37.41255939870624},{lat:55.69291283785411,lng:37.41089724783618},{lat:55.69455592343917,lng:37.40891556316751},{lat:55.69667366694470,lng:37.40597467637404},{lat:55.69902631185976,lng:37.40284869045891},{lat:55.70043529977725,lng:37.40089750984127},{lat:55.70237039962674,lng:37.39835210608031},{lat:55.70472451826392,lng:37.39510091449495},{lat:55.70720886390723,lng:37.39183231766243},{lat:55.70829093329646,lng:37.39036077211014},{lat:55.70927421982285,lng:37.38923231345775},{lat:55.71093487620277,lng:37.38768136013159},{lat:55.71362742558248,lng:37.38589077530381},{lat:55.71686382285998,lng:37.38421842417154},{lat:55.71910817112572,lng:37.38306903634741},{lat:55.72103052781662,lng:37.38209558518112},{lat:55.72343432342813,lng:37.38080488881704},{lat:55.72885810618453,lng:37.37806302580871},{lat:55.73195043755036,lng:37.37654457617025},{lat:55.73416825827977,lng:37.37537062511760},{lat:55.74196269598330,lng:37.37142063836649},{lat:55.74472231147532,lng:37.37007283197866},{lat:55.74648824455322,lng:37.36955763345821},{lat:55.74855703314344,lng:37.36909018468913},{lat:55.74995099957223,lng:37.36897512099124},{lat:55.75131838638021,lng:37.36890716333390},{lat:55.75642542782661,lng:37.36908279764671},{lat:55.76419205834882,lng:37.36916957423084},{lat:55.76775765483770,lng:37.36940787398629},{lat:55.77045196199951,lng:37.36941345157524},{lat:55.78022949376969,lng:37.36972672045984},{lat:55.78382235189706,lng:37.36988467761424},{lat:55.78634381613056,lng:37.37064248788063},{lat:55.78835909376002,lng:37.37172232667091},{lat:55.79013534273907,lng:37.37314104581686},{lat:55.79265855522492,lng:37.37554079515508},{lat:55.79512801093658,lng:37.37795502365076},{lat:55.79890512891060,lng:37.38152592209875},{lat:55.80096856056720,lng:37.38354846244134},{lat:55.80203417147715,lng:37.38451474805868},{lat:55.80394655896753,lng:37.38593378771277},{lat:55.80516459669449,lng:37.38671985970399},{lat:55.80677186094707,lng:37.38759732693204},{lat:55.80800710665552,lng:37.38805225596673},{lat:55.80964846944274,lng:37.38868899404271},{lat:55.81519761479022,lng:37.39028304031105},{lat:55.81822086604813,lng:37.39131524042557},{lat:55.82149209756582,lng:37.39228802126712},{lat:55.82536299191827,lng:37.39353378609167},{lat:55.82865898321715,lng:37.39432619619180},{lat:55.83119520053286,lng:37.39511662624810},{lat:55.83431860148895,lng:37.39603076298695},{lat:55.83666632903150,lng:37.39609751651364},{lat:55.83854716950599,lng:37.39574099480039},{lat:55.83995624692795,lng:37.39523242748308},{lat:55.84175078488869,lng:37.39420103201642},{lat:55.84455623979766,lng:37.39233950970215},{lat:55.84576325541551,lng:37.39183020532411},{lat:55.84710051861277,lng:37.39168300250544},{lat:55.84823323644980,lng:37.39186689939368},{lat:55.84977820491162,lng:37.39253432084244},{lat:55.85204099251214,lng:37.39386708897936},{lat:55.85470499866499,lng:37.39526142495984},{lat:55.85821100477718,lng:37.39717098910836},{lat:55.86081070714628,lng:37.39880983354644},{lat:55.86290093649281,lng:37.40055988128852},{lat:55.86463271490111,lng:37.40229210828177},{lat:55.86596826578698,lng:37.40401535958998},{lat:55.86789656305756,lng:37.40661533307214},{lat:55.86956972837124,lng:37.40932219055988},{lat:55.87123745232827,lng:37.41279672557199},{lat:55.87252080111387,lng:37.41576934564625},{lat:55.87346218766490,lng:37.41834666399977},{lat:55.87450320523325,lng:37.42174400559361},{lat:55.87588350380058,lng:37.42610725446411},{lat:55.87800624412920,lng:37.43288034432743},{lat:55.87900917280690,lng:37.43607512486399},{lat:55.88035420575883,lng:37.44033858189906},{lat:55.88126421879640,lng:37.44355509731729},{lat:55.88170327369402,lng:37.44552340353945},{lat:55.88215675395691,lng:37.44827128803249},{lat:55.88242482345900,lng:37.45038476454539},{lat:55.88262357509228,lng:37.45368207666296},{lat:55.88276675287575,lng:37.46039857645620},{lat:55.88283120445261,lng:37.46272249012664},{lat:55.88306480694538,lng:37.46509211403182},{lat:55.88341703130047,lng:37.46733488640342},{lat:55.88375620030696,lng:37.46918101261366},{lat:55.88471531698642,lng:37.47301813947615},{lat:55.88589905528725,lng:37.47778366218316},{lat:55.88697167782900,lng:37.48204164828009},{lat:55.88815080521728,lng:37.48649564232768},{lat:55.88887037500101,lng:37.48881538869701},{lat:55.88964351646285,lng:37.49093215193086},{lat:55.89114255566128,lng:37.49432050728916},{lat:55.89334796431956,lng:37.49932988469516},{lat:55.89832907640169,lng:37.51070574942148},{lat:55.90299776603524,lng:37.52119604981055},{lat:55.90490102295211,lng:37.52615956187792},{lat:55.90559513455337,lng:37.52847769766065},{lat:55.90631633132545,lng:37.53186402736476},{lat:55.90683463065395,lng:37.53509823873847},{lat:55.90730097993598,lng:37.53887582152657},{lat:55.90779664844813,lng:37.54380316225020},{lat:55.90854398348802,lng:37.55066288552770},{lat:55.90887537672551,lng:37.55401718850632},{lat:55.91011966713502,lng:37.56547870330471},{lat:55.91069923617941,lng:37.57119067396094},{lat:55.91094585594877,lng:37.57431919496496},{lat:55.91104082993976,lng:37.57715865054193},{lat:55.91096705614208,lng:37.57975528471228},{lat:55.91082660187286,lng:37.58189844081862},{lat:55.91037787459712,lng:37.58549291114728},{lat:55.90989812728027,lng:37.58790512482190},{lat:55.90945292632998,lng:37.59001558162269},{lat:55.90839441222120,lng:37.59371134991377},{lat:55.90728388564025,lng:37.59786970700354},{lat:55.90629337878605,lng:37.60136454748221},{lat:55.90338414752890,lng:37.61191934298320},{lat:55.90194126067735,lng:37.61768401135029},{lat:55.90132826960460,lng:37.62052333980920},{lat:55.90041426402339,lng:37.62484149360284},{lat:55.89954502566342,lng:37.62952192863668},{lat:55.89852138968958,lng:37.63568438605810},{lat:55.89781393788073,lng:37.64044480632882},{lat:55.89733065087918,lng:37.64420643960534},{lat:55.89638800645776,lng:37.65214023797620},{lat:55.89595847307054,lng:37.65756118386474},{lat:55.89572948891013,lng:37.66067375477324},{lat:55.89555591325919,lng:37.66435887022745},{lat:55.89527342808089,lng:37.66980729429211},{lat:55.89512146575505,lng:37.67593651874059},{lat:55.89497276775484,lng:37.68094355577571},{lat:55.89480150358781,lng:37.68830363945243},{lat:55.89465178718341,lng:37.69347199999130},{lat:55.89439218774724,lng:37.69607638234308},{lat:55.89408868305920,lng:37.69838670471187},{lat:55.89363792876434,lng:37.70072557716561},{lat:55.89309879769646,lng:37.70298447970433},{lat:55.89201442322737,lng:37.70610771561287},{lat:55.89104872664529,lng:37.70846931373238},{lat:55.88985223995604,lng:37.71107472713344},{lat:55.88779619779761,lng:37.71521468891532},{lat:55.88617088861371,lng:37.71827077409037},{lat:55.88386088864407,lng:37.72288965399609},{lat:55.88163086079048,lng:37.72713472342035},{lat:55.88009438830453,lng:37.73055519023102},{lat:55.87836108218723,lng:37.73377808607188},{lat:55.87421805300612,lng:37.74197199774660},{lat:55.87025935377016,lng:37.74972692883132},{lat:55.86716915288539,lng:37.75575958668274},{lat:55.86550038530170,lng:37.75899398733887},{lat:55.86325592920206,lng:37.76333960648601},{lat:55.86002694450634,lng:37.76960633972074},{lat:55.85719929107010,lng:37.77502168979130},{lat:55.85391943304174,lng:37.78150343095999},{lat:55.85072926123608,lng:37.78770723117364},{lat:55.84722514695319,lng:37.79459171535569},{lat:55.84269399560758,lng:37.80331604282017},{lat:55.84045392655363,lng:37.80758181097845},{lat:55.83815679000626,lng:37.81211261674639},{lat:55.83551910531399,lng:37.81719902704293},{lat:55.83303342856193,lng:37.82196872490539},{lat:55.83055752223257,lng:37.82684737539510},{lat:55.82895985887745,lng:37.82975684173607},{lat:55.82708104488207,lng:37.83244583570567},{lat:55.82431461581076,lng:37.83537751458664},{lat:55.82187263765778,lng:37.83697285678264},{lat:55.82008793120474,lng:37.83784133707627},{lat:55.81877264078596,lng:37.83808562520237},{lat:55.81602266318789,lng:37.83851984399151},{lat:55.81245607126787,lng:37.83899501541434},{lat:55.80875061596728,lng:37.83944186004503},{lat:55.80162593723772,lng:37.83994527951534},{lat:55.79586325158665,lng:37.84057290165646},{lat:55.78518719717258,lng:37.84176086344998},{lat:55.77695544317194,lng:37.84268427443081}],sessionid:""}];
+*/
+
+function yandex_initialize(){
+YMaps.jQuery(function()
+             {map=new YMaps.Map(YMaps.jQuery("#map")[0]);
+             	map.setCenter(new YMaps.GeoPoint(gpMoscowCenter.lng, gpMoscowCenter.lat ), 11);
+             });
+map.addControl(new YMaps.TypeControl([YMaps.MapType.MAP, YMaps.MapType.SATELLITE, YMaps.MapType.HYBRID], [0,1,2]));
+map.addControl(new YMaps.ScaleLine());
+map.addControl(new YMaps.SearchControl({resultsPerPage: 5, useMapBounds: 1, prefLang: "ru"}));
+map.addControl(new YMaps.Zoom());
+YMaps.Events.observe(map, map.Events.Click,yandex_MapClick); 
+map.enableScrollZoom();
+map.enableScrollZoom({smooth:true});
+SetArrayOfPolygonNew(areas);
+SendToBack("254");
+}
+
+function scroller(evt)
+{
+	if ((evt.shiftKey==false)&&(evt.altKey==false)&&(evt.ctrlKey==false))
+	  {
+	  	var zoom = map.getZoom();
+			zoom=(evt.wheelDelta<0)?zoom-=1:zoom+=1;
+			map.setZoom(zoom)
+		}
+}
+//https://msdn.microsoft.com/en-us/library/ms536951%28v=vs.85%29.aspx
+//https://msdn.microsoft.com/en-us/library/aa703876%28v=vs.85%29.aspx
+
+function yandex_GetGeoPointList(aGMPointArray, GeoPoints){
+var points = [];
+var LatLon = [];
+points = aGMPointArray.split(';');
+for (var pt=0;pt<points.length;pt++){
+LatLon=points[pt].split(',');
+GeoPoints.push(new YMaps.GeoPoint(LatLon[1],LatLon[0]));
+}
+}
+
+function yandex_GetPolygonStyle(aID,aBorderColor, aFillColor){
+var StyleName = "polygon#"+aID;
+var style = new YMaps.Style("default#greenSmallPoint");
+style.polygonStyle = new YMaps.PolygonStyle();
+style.polygonStyle.fill = 1;
+style.polygonStyle.outline = 1;
+style.polygonStyle.strokeWidth = 1;
+style.polygonStyle.strokeColor = aBorderColor+"FF";
+style.polygonStyle.fillColor = aFillColor+"40";
+YMaps.Styles.add(StyleName, style);
+return StyleName;
+}
+
+// ----
+function yandex_CreatePolygon(aPath, aBorderColor, aFillColor, aShortDescr, aFullDescr,aID, aRecordState, aParentID, aName, aLevel, aRouteNum, aDays, aSessionID){
+var res=-1;	
+var GeoPoints = [];
+var area_DblClick=null;
+var ind = PolygonList.length;
+var id = aID;
+var md = {
+ _index: ind ? ind : 0
+,ID: aID ? aID : 0
+,RecordState : aRecordState ? aRecordState : 0
+,ParentID : aParentID ? aParentID : 0
+,Name : aName ? aName : aFullDescr
+,Level : aLevel ? aLevel : 3
+,RouteNum : aRouteNum ? aRouteNum : aID ? aID : 0
+,Days : aDays ? aDays : "1111111" // as array 0..6
+,LineColor: aBorderColor ? aBorderColor : "FF0000"
+,FillColor : aFillColor ? aFillColor : "FFFF00"
+,SessionID : aSessionID ? aSessionID : "index_"+PolygonList.length
+};
+var interact;
+interact = YMaps.Interactivity.INTERACTIVE;
+yandex_GetGeoPointList(aPath, GeoPoints);
+if (GeoPoints.length!=0){
+var polygon = new YMaps.Polygon(GeoPoints,
+{style:yandex_GetPolygonStyle(id,aBorderColor, aFillColor),hasHint:1,hasBalloon:0,interactive:interact,zIndex:0});
+polygon.id = md.ID;
+polygon.name = aShortDescr;
+polygon.description = aFullDescr;
+polygon.metaDataProperty = md;
+
+YMaps.Events.observe(polygon, polygon.Events.Click,yandex_PolygonClick); 	
+YMaps.Events.observe(polygon, polygon.Events.PositionChange,yandex_PolygonInfo); 	
+if ((map)&&(polygon)) {map.addOverlay(polygon)};
+}
+if (polygon) {
+PolygonList.push(polygon);
+polygon.metaDataProperty._index = PolygonList.length-1;
+res=polygon.metaDataProperty._index;
+}
+return res;	
+}
+
+function yandex_CreatePolygonNew(aPts, aBorderColor, aFillColor, aShortDescr, aFullDescr, aID, aRecordState, aParentID, aName, aLevel, aRouteNum, aDays, aSessionID){
+try
+	{
+		var res=-1;	
+		var GeoPoints = [];
+		for (var pt=0;pt<aPts.length;pt++){GeoPoints.push(new YMaps.GeoPoint(aPts[pt].lng,aPts[pt].lat));}
+		if (GeoPoints.length==0){return res;};
+		var ind = PolygonList.length;
+		var md = 
+  		{	_index: ind ? ind : 0
+				,ID: aID ? aID : 0
+				,RecordState : aRecordState ? aRecordState : 0
+				,ParentID : aParentID ? aParentID : 0
+				,Name : aName ? aName : aFullDescr
+				,Level : aLevel ? aLevel : 3
+				,RouteNum : aRouteNum ? aRouteNum : aID ? aID : 0
+				,Days : aDays ? aDays : "1111111" // as array 0..6
+				,LineColor: aBorderColor ? aBorderColor : "FF0000"
+				,FillColor : aFillColor ? aFillColor : "FFFF00"
+				,SessionID : aSessionID ? aSessionID : "index_"+PolygonList.length
+			};
+		var polygon = new YMaps.Polygon(GeoPoints,{style:yandex_GetPolygonStyle(md.ID,aBorderColor, aFillColor),hasHint:1,hasBalloon:0,interactive:YMaps.Interactivity.INTERACTIVE,zIndex:0});
+		polygon.id = md.ID;
+		polygon.name = aShortDescr;
+		polygon.description = aFullDescr;
+		polygon.metaDataProperty = md;
+		YMaps.Events.observe(polygon, polygon.Events.Click,yandex_PolygonClick); 	
+		YMaps.Events.observe(polygon, polygon.Events.PositionChange,yandex_PolygonInfo); 	
+		if ((map)&&(polygon)) {map.addOverlay(polygon)};
+		if (polygon) 
+  		{	PolygonList.push(polygon);
+				polygon.metaDataProperty._index = PolygonList.length-1;
+				res=polygon.metaDataProperty._index;
+			}
+	}
+catch(e){SendMessage('ERROR|'+getFnName(arguments.callee)+': '+e.message)}
+finally{return res;}
+}
+
+function yandex_PolygonAbout(polygon){
+polygon.closeBalloon();		
+var ArrPoints = polygon.getPoints();
+var Points = "";
+var Style = YMaps.Styles.get(polygon.getOptions().style);
+for (var i=0;i<ArrPoints.length;i++)
+Points = Points+'<LATLNG><LAT>'+ArrPoints[i].getLat()+'</LAT><LNG>'+ArrPoints[i].getLng()+'</LNG></LATLNG>\n';
+var Result =
+'<AREA>'+'\n'+
+'<_MODE>YANDEX</_MODE>\n'+
+'<_INDEX>'+polygon.metaDataProperty._index+'</_INDEX>\n'+
+'<_POINTS>'+ArrPoints.length+'</_POINTS>\n'+
+'<SESSIONID>'+polygon.metaDataProperty.SessionID+'</SESSIONID>\n'+
+'<RECORDSTATE>'+polygon.metaDataProperty.RecordState+'</RECORDSTATE>\n'+
+'<ID>'+polygon.metaDataProperty.ID+'</ID>'+'\n'+
+'<PARENTID>'+polygon.metaDataProperty.ParentID+'</PARENTID>\n'+
+'<NAME>'+polygon.metaDataProperty.Name+'</NAME>\n'+
+'<LEVEL>'+polygon.metaDataProperty.Level+'</LEVEL>\n'+
+'<RGBLINE>'+Style.polygonStyle.strokeColor.substring(0,6).toUpperCase()+'</RGBLINE>\n'+
+'<RGBFILL>'+Style.polygonStyle.fillColor.substring(0,6).toUpperCase()+'</RGBFILL>\n'+
+'<ROUTENUM>'+polygon.metaDataProperty.RouteNum+'</ROUTENUM>\n'+
+'<DAYS>'+polygon.metaDataProperty.Days+'</DAYS>\n'+
+Points+
+'</AREA>';
+return Result;	
+}	
+
+function yandex_PolygonInfo(polygon){
+var Result=yandex_PolygonAbout(polygon);
+SetValueOf("AreaXML", Result);	
+}
+
+function yandex_PolygonClick(polygon, event){
+// -- call edit via Ctrl before 20140827	
+yandex_MapClick(polygon, event); // координаты
+yandex_PolygonInfo(polygon);
+}
+
+function yandex_PolygonStartEditing(aIndex){
+polygon = PolygonList[aIndex];
+if ((polygon)&&(!polygon.isEditing())) {polygon.startEditing();};
+polygon.metaDataProperty.RecordState=1;
+yandex_PolygonInfo(polygon);
+}	
+
+function yandex_PolygonStopEditing(aIndex, aAreaID){
+polygon = PolygonList[aIndex];	
+if ((polygon)&&(polygon.isEditing())) {polygon.stopEditing();};
+polygon.metaDataProperty.ID=aAreaID;
+polygon.metaDataProperty.RecordState=0
+yandex_PolygonInfo(polygon);
+}	
+
+// -- а вот на одном маркере не работает (т.е. после первого показа больше не показывает балон)
+//function SendToBack(obj){
+//	obj.setOptions({zIndex:-999});
+//}
+
+function SendToBack(aSessionID){
+var ind = -1;
+var z = 1000000;
+for (var i=0; i<PolygonList.length; i++){
+if ((ind==-1)&&((PolygonList[i].metaDataProperty.SessionID == aSessionID)||(PolygonList[i].metaDataProperty.ID+""==aSessionID)))
+   {ind=i;}
+if (PolygonList[i].getOptions().zIndex < z)
+   {z=PolygonList[i].getOptions().zIndex;}
+}
+z=z-1;
+if (ind!=-1) 
+ {PolygonList[ind].setOptions({zIndex:z});}	
+}
+
+
+function yandex_CreateMarker(aLatitude, aLongitude, aDescription, aCorner){
+var aCurStyle = GreenMarkerIcon;
+if (aDescription.lastIndexOf(")*")!=-1){aCurStyle = RedMarkerIcon;}
+if (aCorner){aCurStyle = BlueMarkerIcon;}
+
+var marker = new YMaps.Placemark(new YMaps.GeoPoint(aLongitude, aLatitude),
+{draggable:0,
+ hideIcon:false,
+ interactive:YMaps.Interactivity.INTERACTIVE,
+ hintOptions:{maxWidth:250, showTimeout:200,offset: new YMaps.Point(5, 5)},
+ balloonOptions:{maxWidth:250, hasCloseButton:true, mapAutoPan:1}
+});
+marker.description = aDescription;
+var MarkerStyle = new YMaps.Style();
+MarkerStyle.iconStyle = new YMaps.IconStyle();
+MarkerStyle.iconStyle.size = new YMaps.Point(10, 10); // -data-
+MarkerStyle.iconStyle.offset = new YMaps.Point(-5, -5);
+MarkerStyle.iconStyle.href = aCurStyle;
+marker.setStyle(MarkerStyle);
+//YMaps.Events.observe(marker, marker.Events.BalloonOpen,SendToBack); 
+map.addOverlay(marker);
+MarkerList.push(marker);
+}
+
+function yandex_RoutePack(aObj, aIndex, aWPArray){
+var pt=new YMaps.GeoPoint(aObj.lng,aObj.lat);
+var wp=null;
+for (var i=0; i<aWPArray.length; i++)
+{	if (aWPArray[i].getGeoPoint().toString()==pt.toString())
+	  {aWPArray[i].metaDataProperty.Caption=aWPArray[i].metaDataProperty.Caption+","+(aIndex+1);	
+	   aWPArray[i].description=aWPArray[i].description+/*'<tr><td>'+*/"<div class='fi80red'>\u0422\u043E\u0447\u043A\u0430\u0020\u2116"+(aIndex+1)+"</div>"+aObj.descr/*+'</td></tr>'*/;		
+	   return;}
+}
+wp=new YMaps.WayPoint(pt);
+wp.metaDataProperty.Caption=""+(aIndex+1);
+wp.description="<div class='fi80red'>\u0422\u043E\u0447\u043A\u0430\u0020\u2116"+(aIndex+1)+"</div>"+aObj.descr;
+aWPArray.push(wp);	
+}
+
+function yandex_Route(aPoints){	
+try{	
+if (route) {map.removeOverlay(route); route=null};	
+rs = new YMaps.Style();
+rs.lineStyle = new YMaps.LineStyle();
+rs.lineStyle.strokeColor = "000000";
+rs.lineStyle.strokeWidth = 2;
+rs.hideIcon=false;
+YMaps.Styles.add("router#RouteLine", rs);
+var points = []
+var waypoints = []
+var params = [];
+var wp = null;
+for (var i=0; i<aPoints.length; i++) 
+ {yandex_RoutePack(aPoints[i], i, waypoints); }	
+for (var i=0; i<waypoints.length; i++) 
+ {points.push(waypoints[i].getGeoPoint())}	 
+route = new YMaps.Router(points,[],{viewAutoApply:true});
+route.setStyle(rs);
+route.metaDataProperty.Source=aPoints;
+route.metaDataProperty.WayPoints=waypoints;
+YMaps.Events.observe(route, route.Events.Load, function(){
+	for (var pt=0; pt<points.length; pt++)
+    {wp = route.getWayPoint(pt);
+     wp.setStyle("default#nightSmallPoint");    
+     wp.setIconContent(waypoints[pt].metaDataProperty.Caption);
+     wp.setOptions({hideIcon:false});
+     //var descr='<table>'+waypoints[pt].description+'</table>'; 
+     wp.setBalloonContent(waypoints[pt].description);
+     wp.setBalloonOptions({maxWidth:200, hasCloseButton:true, mapAutoPan:1});
+    }	     
+});
+map.addOverlay(route);	
+}catch(e){/*alert(e.name);*/}
+}
+
+function yandex_MapClick(obj, event){
+var pt=event.getCoordPoint();	
+var str = pt.getLat()+","+pt.getLng();	
+SetValueOf("ClickCoord",str);
+}
+
+
+function yandex2_CreateNewArea(lat,lng,num,dist,clrBord,clrFill,Descr,SessionID){
+var ind = -1;	
+var pts = ""
+for (i=0;i<num;i++){
+	angle = (360/num)*i * Math.PI / 180;
+	delta = [Math.cos(angle), Math.sin(angle)];
+	pt=ymaps.coordSystem.geo.solveDirectProblem([lat,lng], delta, dist).endPoint;
+	pts=pts+pt[0]+","+pt[1]+';'}	
+pts=pts.substring(0,pts.length-1);	
+ind=yandex_CreatePolygon(pts,clrBord,clrFill,Descr,Descr, "0", "1", "0",Descr,"3","0","1111111",SessionID);
+if (ind>-1) {  
+	var xml=yandex_PolygonAbout(PolygonList[ind]);
+  SetValueOf("AreaXML", xml);
+	PolygonList[ind].startEditing();	
+	}	
+//event.preventMapEvent();	
+}
+
+
+function yandex_ChangeProps_Colors(aIndex, lineColor, fillColor){
+var polygon = PolygonList[aIndex];
+polygon.metaDataProperty.LineColor=lineColor;
+polygon.metaDataProperty.FillColor=fillColor;
+var StyleName = polygon.getOptions().style;
+var style =  YMaps.Styles.get(StyleName);
+style.polygonStyle.strokeColor = polygon.metaDataProperty.LineColor+"FF";
+style.polygonStyle.fillColor = polygon.metaDataProperty.FillColor+"40";
+polygon.setOptions({style: StyleName});
+}
+
+function yandex_ChangeProps_Value(aIndex, aProp, aValue){
+var polygon = PolygonList[aIndex];
+switch (aProp){
+case ipID:
+  polygon.metaDataProperty.ID = aValue; 
+  break;
+case ipParentID:
+  polygon.metaDataProperty.ParentID = aValue; 
+  break;  
+case ipName:
+  polygon.metaDataProperty.Name = aValue;
+  polygon.name = aValue;
+  polygon.description = aValue;
+  // -- необходимо для обновления Hint-а --
+  var StyleName = polygon.getOptions().style;
+  var style =  YMaps.Styles.get(StyleName);
+  polygon.setOptions({style: StyleName});
+  break;
+case ipLevel:
+  polygon.metaDataProperty.Level = aValue; 
+  break;
+case ipLineColor:
+  polygon.metaDataProperty.LineColor = aValue; 
+  yandex_ChangeProps_Colors(aIndex, polygon.metaDataProperty.LineColor, polygon.metaDataProperty.FillColor);
+  break;
+case ipFillColor:
+  polygon.metaDataProperty.FillColor = aValue; 
+  yandex_ChangeProps_Colors(aIndex, polygon.metaDataProperty.LineColor, polygon.metaDataProperty.FillColor);
+  break;
+case ipRoute:
+  polygon.metaDataProperty.RouteNum = aValue; 
+  break;
+case ipSessionID:
+  polygon.metaDataProperty.SessionID = aValue; // -- !! в крайнем случае
+  break;
+default : 
+  break;
+}
+polygon.metaDataProperty.RecordState = 1;
+yandex_PolygonInfo(polygon);
+}	
+
+function yandex_DeleteArea(aIndex){
+var polygon = PolygonList[aIndex];
+var del = PolygonList.splice(aIndex, 1);
+for (var i=0; i<del.length; i++)
+ {del[i].metaDataProperty.ID = Math.abs(del[i].metaDataProperty.ID)*-1; 
+ 	DeletedPolygonList.push(del[i]); 	
+ 	};
+map.removeOverlay(polygon);	
+var Result=yandex_PolygonAbout(DeletedPolygonList[DeletedPolygonList.length-1]);
+SetValueOf("AreaXML", Result);
+}
+
+function yandex_SetCenter(aLat,aLng){map.setCenter(new YMaps.GeoPoint(aLng, aLat), map.getZoom());};
+
+// ----------------------------------------------------------------------------------	
+function initialize() {
+yandex_initialize();
+}	
+
+function ClearPolygonList(){
+for (var i=PolygonList.length-1;i>=0;i--) {map.removeOverlay(PolygonList[i]);}
+PolygonList=[];
+}
+
+function ClearMarkerList(){
+for (var i=MarkerList.length-1;i>=0;i--) {map.removeOverlay(MarkerList[i]);}
+MarkerList=[];
+}
+
+function ClearRouteList(){
+map.removeOverlay(route);
+route=null;
+}
+
+function SetArrayOfPolygon(aPolygons) {
+ClearPolygonList();	
+var StrPolygons = aPolygons.split(AreaDelimiter);
+var Params = []
+var ind = 0;
+var nm = "";
+var desc = "";
+for (var i=0;i<StrPolygons.length; i++){	
+Params=StrPolygons[i].split(GroupDelimiter);
+ind=i+1;
+nm ="\u0420\u0435\u0433\u0438\u043E\u043D №"+ind;
+if (Params[3]) nm=Params[3];
+desc =nm;
+if (Params[4]) desc=Params[4];
+yandex_CreatePolygon(Params[0],Params[1].substring(1,10),Params[2].substring(1,10),nm,desc,Params[5],Params[6],Params[7],Params[8],Params[9],Params[10],Params[11]);
+}
+}
+
+function SetArrayOfPolygonNew(aPolygons) {
+	ClearPolygonList();	
+	try
+	{
+		//var nm ;
+		var obj ;
+		var sid;
+		for (var ind=0; ind<aPolygons.length; ind++)
+		{
+		 //nm ="\u0420\u0435\u0433\u0438\u043E\u043D №"+ind;
+		 obj=aPolygons[ind];
+		 yandex_CreatePolygonNew(obj.latlngarr,obj.rgbline,obj.rgbfill,obj.name,obj.name,obj.id,0,obj.parentid,"",obj.level,obj.routenum, obj.days,obj.sessionid);	
+		}
+	}
+catch(e){SendMessage('ERROR|'+getFnName(arguments.callee)+': '+e.message)}
+finally{}
+}
+
+
+function SetBoundsForPoints(aPoints)
+{
+try
+ {
+ 	if (aPoints.length==0) {return;}
+  var minLat = aPoints[0].lat;
+  var maxLat = aPoints[0].lat;
+  var minLon = aPoints[0].lng;
+  var maxLon = aPoints[0].lng;
+  var lat 	 = 0;
+  var lng    = 0;
+  for (var i=0; i<aPoints.length; i++) 
+   {lat = aPoints[i].lat;
+	  lng = aPoints[i].lng;
+	  if (lat>maxLat) {maxLat=lat};
+	  if (lat<minLat) {minLat=lat};
+	  if (lng>maxLon) {maxLon=lng};
+	  if (lng<minLon) {minLon=lng};
+   }
+  var southWest = new YMaps.GeoPoint(minLon, minLat);
+  var nordEast = new YMaps.GeoPoint(maxLon, maxLat);
+  var bound = new YMaps.GeoBounds(southWest,nordEast);
+  map.setBounds(bound);	
+   
+  //var southWest = new YMaps.GeoPoint(minLon, minLat);
+  //var nordEast = new YMaps.GeoPoint(maxLon, maxLat);
+  //var bound = new YMaps.GeoBounds(southWest,nordEast);
+  //map.setBounds(bound);
+
+  //yandex_CreateMarker(maxLat,minLon,"TopLeft",1)
+  //yandex_CreateMarker(minLat,maxLon,"RightBottom","a")
+  //yandex_CreateMarker(southWest.getLat(),southWest.getLng(),"southWest",1)
+  //yandex_CreateMarker(nordEast.getLat(),nordEast.getLng(),"nordEast",1)
+ }
+catch(e){alert(e.message)}	
+finally{southWest=null; nordEast=null; bound=null;}
+}
+
+function SetArrayOfMarker(aPoints) {
+ClearMarkerList();	
+for (var i=0; i<aPoints.length; i++) 
+ {yandex_CreateMarker(aPoints[i].lat,aPoints[i].lng,aPoints[i].descr);
+ }
+SetBoundsForPoints(aPoints); 
+}
+
+function CreateRoute(aMarkers){
+yandex_Route(aMarkers);
+SetBoundsForPoints(aMarkers); 
+}	
+
+function CreateNewArea(lat,lng,num,dist,clrBord,clrFill,Descr,SessionID){
+if (!CanAreaEdit){return};	
+yandex2_CreateNewArea(lat,lng,num,dist,clrBord,clrFill,Descr,SessionID)	;
+}
+
+function ChangeProps_Value(aIndex, aProp, aValue){
+yandex_ChangeProps_Value(aIndex, aProp, aValue)
+}	
+
+function ChangeProps_BySessionID(aSessionID, aProp, aValue){
+var ind = -1;
+for (var i=0; i<PolygonList.length; i++){
+if (PolygonList[i].metaDataProperty.SessionID == aSessionID){
+   ind=i;
+   break;
+   }
+}
+if (ind!=-1) {yandex_ChangeProps_Value(ind, aProp, aValue);}
+}	
+
+function DeleteAreaByIndex(aIndex){
+yandex_DeleteArea(aIndex)
+}	
+
+function DeleteAreaBySessionID(aSessionID){
+var ind = -1;
+for (var i=0; i<PolygonList.length; i++){
+if (PolygonList[i].metaDataProperty.SessionID == aSessionID){
+   ind=i;
+   break;
+   }
+}
+if (ind!=-1) {DeleteAreaByIndex(ind);}
+}	
+
+function EditAreaBySessionID(aSessionID){
+var ind = -1;
+for (var i=0; i<PolygonList.length; i++){
+if (PolygonList[i].metaDataProperty.SessionID == aSessionID){
+   ind=i;
+   break;
+   }
+}
+if (ind!=-1) {yandex_PolygonStartEditing(ind);}
+}	
+
+
+function SaveAreaBySessionID(aSessionID, AreaID){
+var ind = -1;
+for (var i=0; i<PolygonList.length; i++){
+if (PolygonList[i].metaDataProperty.SessionID == aSessionID){
+   ind=i;
+   break;
+   }
+}
+if (ind!=-1) {yandex_PolygonStopEditing(ind, AreaID);}
+}	
+
+
+function PolygonAboutBySessionID(aSessionID){
+var ind = -1;
+for (var i=0; i<PolygonList.length; i++){
+if (PolygonList[i].metaDataProperty.SessionID == aSessionID){
+   yandex_PolygonAbout(PolygonList[i]);
+   return;
+   }
+}
+}	
+
+function AboutBrowser(){
+	try
+	{
+		var about = "Версия браузера ("+navigator.userAgent+") : ";
+    if (document.all && !document.querySelector) { about+='IE7 или ниже; ';}
+    if (document.all && document.querySelector && !document.addEventListener) {about+='IE8;'}
+    if (!document.all) {about+='IE11+ или не IE;';}	
+    SendMessage('RESULT|'+about); 
+  }
+catch(e){SendMessage('ERROR|'+getFnName(arguments.callee)+': '+e.message)}
+finally{}
+}
+
+function Start(){
+	AboutBrowser();
+	initialize();
+	}
+// --- common utils functions ---------------------------------------------------------------------
+function GetObjectProps(aObj,Level){var Result = "";for (var key in aObj){Result=Result+key+":"+aObj[key]+'\n'}return Result;}	
+function SetValueOf(aName,aValue){if (typeof this[aName] != "undefined"){this[aName].value=aValue; SendMessage(aName);} else {}}
+function SendMessage(aText){try{window.navigate("#"+aText);}catch(e){var url = "#"+aText;location.href = url;}/*finally{alert(aText);}*/}
+function getFnName(fn){return fn.toString().match(/function ([^(]*)\(/)[1];} //http://javascript.ru/forum/misc/4895-uznat-imya-funkcii.html
+// ------------------------------------------------------------------------
+</script> 
+</head> 
+<body onload="Start()" onmousewheel="scroller(event)">
+<div id="map" style="width:100%; height:100%"></div>
+<input type="hidden" id="AreaXML" value="">	
+<input type="hidden" id="ClickCoord" value="">
+</body>
+</html>	
+	
+	
+	

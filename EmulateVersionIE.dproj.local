@@ -1,0 +1,8 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<BorlandProject>
+  <Transactions>
+    <Transaction>2015.06.23 11:28:40.833,=D:\Projects_Common\FnCommon.pas</Transaction>
+    <Transaction>2015.06.23 11:29:23.152,D:\Projects Work\AreaEditor\CallCheckVersionIE.dproj=C:\Users\s.kholin.KUPIVIP\Documents\RAD Studio\Projects\Project4.dproj</Transaction>
+    <Transaction>2015.06.23 11:29:52.246,D:\Projects Work\AreaEditor\EmulateVersionIE.dproj=D:\Projects Work\AreaEditor\CallCheckVersionIE.dproj</Transaction>
+  </Transactions>
+</BorlandProject>

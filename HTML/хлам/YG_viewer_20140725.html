@@ -1,0 +1,636 @@
+<html> 
+	<meta content="text/html; charset=windows-1251">
+<head> 	
+<meta name="viewport" content="initial-scale=1.0, user-scalable=yes" /> 
+<style type="text/css">
+.fi80 {font-size: 80%;font-family: Verdana, Arial, Helvetica, sans-serif;color: #333366;font-style: italic}	
+.fi80red {font-size: 80%;font-family: Verdana, Arial, Helvetica, sans-serif;color: #FF0000;font-style: italic}
+.fn80 {font-size: 80%;font-family: Verdana, Arial, Helvetica, sans-serif;color: #333366;font-style: normal}
+.fi60 {font-size: 60%;font-family: Verdana, Arial, Helvetica, sans-serif;color: #333366;font-style: italic}
+.fn70 {font-size: 70%;font-family: Verdana, Arial, Helvetica, sans-serif;color: #333366;font-style: normal}
+#map {width: 600px;height: 500px;}
+</style>
+<!-- Google API (2.0) -->		 
+<script type="text/javascript" src="http://maps.google.com/maps/api/js?sensor=false&language=ru&libraries=geometry&libraries=drawing"></script> 
+<!-- Yandex API (1.1) -->		 
+<script src="http://api-maps.yandex.ru/1.1/index.xml?key=ACqXr04BAAAApj0QTQIA5ZRpd24FKNARrEXm_URr9UX1ctoAAAAAAAAAAADMzOCSlBoxcozrjxnvD_uKzYQvNQ==" type="text/javascript"></script>
+<script type="text/javascript"> 
+FieldsDelimiter  = '†';
+RecordsDelimiter = '•';	
+GroupDelimiter = '†';
+ItemDelimiter = '•';
+AreaDelimiter = '&';
+crlf = '\n';	
+mmYandex  = 0;
+mmGoogle  = 1;
+var MapMode = mmYandex; //  : 0- yandex, 1- google
+var gpMoscowCenter = {lat:55.755833,lng:37.617778};
+var gpSPBCenter    = {lat:59.95,lng:30.316667} ;
+var map = null;	
+var PolygonList = [];
+var MarkerList = [];
+var route = null;
+var InfoWindow = null;
+var placemark = null;
+var GreenMarkerIcon  = "data:image/gif;base64,R0lGODlhCgAKAHcAACH5BAUAABgALAAAAAAKAAoAhwD3AAiUCAicCAitCAjWCBj/GCGcISG9ISHWISnvKTk5OUqcSkr/SlpaWlreWnNzc3t7e4yMjJTWlJycnKWlxq2tra3Orb3evcb//9bn1v///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////whUADFgsGAggEELAjEYcCABwYCHAgYu0JBBAoGLBA4EOCDhggMCAAAUQBBgAAIEIUUySFDyokoGK1u+hJnAwgACBWDqPKAQQQKdDBAkNOAzAQKeGAICADs=";
+var YellowMarkerIcon = "data:image/gif;base64,R0lGODlhCgAKAHcAACH5BAUAAA4ALAAAAAAKAAoAhzk5OVpaWnNzc3t7e4yMjJSECJyMCJyMIZyUSpycnKWlxq2cCK2trb2lIcb//87Orda1CNa9IdbOlN7OWt7evefn1u/WKffWAP/nGP/vSv///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////whUAB04eHCggMEHAh0cmCAhwoKHBgYi0FBBAoSLEBoUaCCBwgQIFy5giFBgQYQIIUVmsFDyosoMK1u+hGnhwQIIGGDqbKAwggWdGSIkPODTQgSeDgICADs=";
+var RedMarkerIcon 	 = "data:image/gif;base64,R0lGODlhCgAKAHcAACH5BAUAANEALAAAAAAKAAoAhwAAAAAAMwAAZgAAmQAAzAAA/wArAAArMwArZgArmQArzAAr/wBVAABVMwBVZgBVmQBVzABV/wCAAACAMwCAZgCAmQCAzACA/wCqAACqMwCqZgCqmQCqzACq/wDVAADVMwDVZgDVmQDVzADV/wD/AAD/MwD/ZgD/mQD/zAD//zMAADMAMzMAZjMAmTMAzDMA/zMrADMrMzMrZjMrmTMrzDMr/zNVADNVMzNVZjNVmTNVzDNV/zOAADOAMzOAZjOAmTOAzDOA/zOqADOqMzOqZjOqmTOqzDOq/zPVADPVMzPVZjPVmTPVzDPV/zP/ADP/MzP/ZjP/mTP/zDP//2YAAGYAM2YAZmYAmWYAzGYA/2YrAGYrM2YrZmYrmWYrzGYr/2ZVAGZVM2ZVZmZVmWZVzGZV/2aAAGaAM2aAZmaAmWaAzGaA/2aqAGaqM2aqZmaqmWaqzGaq/2bVAGbVM2bVZmbVmWbVzGbV/2b/AGb/M2b/Zmb/mWb/zGb//5kAAJkAM5kAZpkAmZkAzJkA/5krAJkrM5krZpkrmZkrzJkr/5lVAJlVM5lVZplVmZlVzJlV/5mAAJmAM5mAZpmAmZmAzJmA/5mqAJmqM5mqZpmqmZmqzJmq/5nVAJnVM5nVZpnVmZnVzJnV/5n/AJn/M5n/Zpn/mZn/zJn//8wAAMwAM8wAZswAmcwAzMwA/8wrAMwrM8wrZswrmcwrzMwr/8xVAMxVM8xVZsxVmcxVzMxV/8yAAMyAM8yAZsyAmcyAzMyA/8yqAMyqM8yqZsyqmcyqzMyq/8zVAMzVM8zVZszVmczVzMzV/8z/AMz/M8z/Zsz/mcz/zMz///8AAP8AM/8AZv8Amf8AzP8A//8rAP8rM/8rZv8rmf8rzP8r//9VAP9VM/9VZv9Vmf9VzP9V//+AAP+AM/+AZv+Amf+AzP+A//+qAP+qM/+qZv+qmf+qzP+q///VAP/VM//VZv/Vmf/VzP/V////AP//M///Zv//mf//zP///wAAAAAAAAAAAAAAAAhWAKNFG/bHj8FhAqP9ATds2h9UBQca2jdvWCpUF1P5STVsmLZU00JqxAgylbRp2qb5+XMxpDZw2rJtROVSm81pwzZOg2nzY7RCIHv6FPjn1bRsqV4JDAgAOw==";
+var BlueMarkerIcon 	 = "data:image/gif;base64,R0lGODlhCgAKAHcAACH5BAUAABgALAAAAAAKAAoAhwAA9wgIlAgInAgIrQgI1hgY/yEhnCEhvSEh1ikp7zk5OUpKnEpK/1paWlpa3nNzc3t7e4yMjJSU1pycnKWlxq2tra2tzr293sb//9bW5////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////whUADFgsGAggEELAjEYcCABwYCHAgYu0JBBAoGLBA4EOCDhggMCAAAUQBBgAAIEIUUySFDyokoGK1u+hJnAwgACBWDqPKAQQQKdDBAkNOAzAQKeGAICADs="
+var VioletMarkerIcon = "data:image/gif;base64,R0lGODlhCgAKAHcAACH5BAUAAAAALAAAAAAKAAoAhwAAAJkAAMwAAP8AAJkAmcwAmf8AmZkAzP8AzMwrzP+AzP///wAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAhNAAEASEAggMEEAgEQQJDAAAEBBQceWKAgQQEBFwsEKJAgAYICBkJqxAiywAADCAwEIHAxJIKXKluifJkywcaZNAsoBEnzY0KWInUCCAgAOw==";
+// --- common utils functions ---------------------------------------------------------------------
+function GetObjectProps(aObj,Level){var Result = "";for (var key in aObj){Result=Result+key+":"+aObj[key]+'\n'}return Result;}	
+function SetValueOf(aName,aValue){if (typeof this[aName] != "undefined"){this[aName].value=aValue; SendMessage(aName);} else {}}
+function SendMessage(aText){window.navigate("#"+aText);}
+function CreateBalloon(md){
+var DeliveyDays = 
+((md.Days.charAt(0)=="1")?'\u041F\u043D, ':"")+
+((md.Days.charAt(1)=="1")?'\u0412\u0442, ':"")+
+((md.Days.charAt(2)=="1")?'\u0421\u0440, ':"")+
+((md.Days.charAt(3)=="1")?'\u0427\u0442, ':"")+
+((md.Days.charAt(4)=="1")?'\u041F\u0442, ':"")+
+((md.Days.charAt(5)=="1")?'\u0421\u0431, ':"")+
+((md.Days.charAt(6)=="1")?'\u0412\u0441, ':"");
+DeliveyDays =  DeliveyDays.substring(0, DeliveyDays.length-2);
+var ZoneName = "";
+switch (Number(md.Level)) {
+ 	case 0 : ZoneName = "\u041E\u0431\u043B\u0430\u0441\u0442\u044C (\u043A\u0440\u0430\u0439)" 
+ 	         break	         
+ 	case 1 : ZoneName = "\u0420\u0430\u0439\u043E\u043D" 
+ 	         break
+ 	case 2 : ZoneName = "\u041D\u0430\u0441\u0435\u043B\u0435\u043D\u043D\u044B\u0439 \u043F\u0443\u043D\u043A\u0442" 
+ 	         break
+ 	case 3 : ZoneName = "\u0417\u043E\u043D\u0430 \u0434\u043E\u0441\u0442\u0430\u0432\u043A\u0438 \u043A\u0443\u0440\u044C\u0435\u0440\u0430" 
+ 	         break
+ 	case 4 : ZoneName = "\u0412\u0440\u0435\u043C\u044F \u0434\u043E\u0441\u0442\u0430\u0432\u043A\u0438 : \u0423\u0442\u0440\u043E" 
+ 	         break
+ 	case 5 : ZoneName = "\u0412\u0440\u0435\u043C\u044F \u0434\u043E\u0441\u0442\u0430\u0432\u043A\u0438 : \u0414\u0435\u043D\u044C" 
+ 	         break
+ 	case 6 : ZoneName =" \u0412\u0440\u0435\u043C\u044F \u0434\u043E\u0441\u0442\u0430\u0432\u043A\u0438 : \u0412\u0435\u0447\u0435\u0440" 
+ 	         break 	         
+ 	default : ZoneName = " -- \u0443\u0440\u043E\u0432\u0435\u043D\u044C \u043D\u0435 \u043E\u043F\u0440\u0435\u043B\u0435\u043D --"
+ 	         break
+}
+var template = "<html><table style=font-size:80%% width='350' border=0>"+
+"<tr><td><div class='fi80'>\u041D\u0430\u0438\u043C\u0435\u043D\u043E\u0432\u0430\u043D\u0438\u0435</div></td><td><div class='fn80'>"+md.Name+"</div></td></tr>"+
+"<tr><td><div class='fi80'>\u0414\u043D\u0438 \u0434\u043E\u0441\u0442\u0430\u0432\u043A\u0438</div></td><td><div class='fn80'>"+DeliveyDays+"</div></td></tr>"+
+"<tr><td><div class='fi80'>\u0423\u0440\u043E\u0432\u0435\u043D\u044C</div></td><td><div class='fn80'>"+ZoneName+"</div></td></tr>"+
+"<tr></td><td colspan=2 align=\"right\"><div class='fi60'> Index:"+md._index+"; ID: "+md.ID+"</div></td></tr>"+
+"</table></html>";	
+return template;
+}
+function HTML2Txt(aHTML){
+var box = document.createElement('htmltxt');
+box.innerHTML = aHTML;
+var res = box.textContent
+if (isNaN(res)) {res = box.innerText}
+return String(res);
+}	
+// ------------------------------------------------------------------------
+function yandex_initialize(){
+YMaps.jQuery(function(){map=new YMaps.Map(YMaps.jQuery("#map_canvas")[0]);map.setCenter(new YMaps.GeoPoint(gpMoscowCenter.lng, gpMoscowCenter.lat ), 11);});
+map.enableScrollZoom(true);
+map.addControl(new YMaps.TypeControl([YMaps.MapType.MAP, YMaps.MapType.SATELLITE, YMaps.MapType.HYBRID], [0,1,2]));
+map.addControl(new YMaps.ScaleLine());
+map.addControl(new YMaps.SearchControl({resultsPerPage: 5, useMapBounds: 1, prefLang: "ru"}));
+map.addControl(new YMaps.Zoom());
+map.enableScrollZoom(true);
+map.disableDblClickZoom();
+YMaps.Events.observe(map, map.Events.Click,yandex_MapClick); 
+YMaps.Events.observe(map, map.Events.AfterClick, function (e) {
+    e.preventMapEvent();
+});
+}
+
+function yandex_GetGeoPointList(aGMPointArray, GeoPoints){
+var points = [];
+var LatLon = [];
+points = aGMPointArray.split(';');
+for (var pt=0;pt<points.length;pt++){
+LatLon=points[pt].split(',');
+GeoPoints.push(new YMaps.GeoPoint(LatLon[1],LatLon[0]));
+}
+}
+
+function yandex_GetPolygonStyle(aID,aBorderColor, aFillColor){
+var StyleName = "polygon#"+aID;
+var style = new YMaps.Style("default#greenSmallPoint");
+style.polygonStyle = new YMaps.PolygonStyle();
+style.polygonStyle.fill = 1;
+style.polygonStyle.outline = 1;
+style.polygonStyle.strokeWidth = 1;
+style.polygonStyle.strokeColor = aBorderColor+"FF";
+style.polygonStyle.fillColor = aFillColor+"40";
+YMaps.Styles.add(StyleName, style);
+return StyleName;
+}
+
+// ----
+function yandex_CreatePolygon(aPath, aBorderColor, aFillColor, aShortDescr, aFullDescr,aID, aRecordState, aParentID, aName, aLevel, aRouteNum, aDays){
+var GeoPoints = [];
+var area_DblClick=null;
+var ind = PolygonList.length;
+var id = aID;
+var md = {
+ _index: ind ? ind : 0
+,ID: aID ? aID : 0
+,RecordState : aRecordState ? aRecordState : 0
+,ParentID : aParentID ? aParentID : 0
+,Name : aName ? aName : aFullDescr
+,Level : aLevel ? aLevel : 3
+,RouteNum : aRouteNum ? aRouteNum : aID ? aID : 0
+,Days : aDays ? aDays : "1111111" // as array 0..6
+,LineColor: aBorderColor ? aBorderColor : "FF0000"
+,FillColor : aFillColor ? aFillColor : "FFFF00"
+};
+var interact;
+interact = YMaps.Interactivity.INTERACTIVE;
+yandex_GetGeoPointList(aPath, GeoPoints);
+if (GeoPoints.length!=0){
+var polygon = new YMaps.Polygon(GeoPoints,
+{style:yandex_GetPolygonStyle(id,aBorderColor, aFillColor),hasHint:1,hasBalloon:0,interactive:interact});
+polygon.id = md.ID;
+polygon.name = aShortDescr;
+polygon.description = aFullDescr;
+polygon.metaDataProperty = md;
+polygon.setBalloonContent(CreateBalloon(md));
+YMaps.Events.observe(polygon, polygon.Events.Click,yandex_PolygonClick); 		
+if ((map)&&(polygon)) {map.addOverlay(polygon)};
+}
+if (polygon) {
+PolygonList.push(polygon);
+polygon.metaDataProperty._index = PolygonList.length-1;
+}
+}
+
+function yandex_PolygonClick(polygon, event){
+var ArrPoints = polygon.getPoints();
+var Points = "";
+var Style = YMaps.Styles.get(polygon.getOptions().style);
+for (var i=0;i<ArrPoints.length;i++)
+Points = Points+'<LATLNG><LAT>'+ArrPoints[i].getLat()+'</LAT><LNG>'+ArrPoints[i].getLng()+'</LNG></LATLNG>\n';
+var Result =
+'<AREA>'+'\n'+
+'<_MODE>YANDEX</_MODE>\n'+
+'<_INDEX>'+polygon.metaDataProperty._index+'</_INDEX>\n'+
+'<_POINTS>'+ArrPoints.length+'</_POINTS>\n'+
+'<RECORDSTATE>'+polygon.metaDataProperty.RecordState+'</RECORDSTATE>\n'+
+'<ID>'+polygon.metaDataProperty.ID+'</ID>'+'\n'+
+'<PARENTID>'+polygon.metaDataProperty.ParentID+'</PARENTID>\n'+
+'<NAME>'+polygon.metaDataProperty.Name+'</NAME>\n'+
+'<LEVEL>'+polygon.metaDataProperty.Level+'</LEVEL>\n'+
+'<RGBLINE>'+Style.polygonStyle.strokeColor.substring(0,6).toUpperCase()+'</RGBLINE>\n'+
+'<RGBFILL>'+Style.polygonStyle.fillColor.substring(0,6).toUpperCase()+'</RGBFILL>\n'+
+'<ROUTENUM>'+polygon.metaDataProperty.RouteNum+'</ROUTENUM>\n'+
+'<DAYS>'+polygon.metaDataProperty.Days+'</DAYS>\n'+
+Points+
+'</AREA>';
+polygon.closeBalloon();	
+SetValueOf("AreaXML", Result);
+yandex_MapClick(polygon,event);
+}
+
+function yandex_CreateMarker(aLatitude, aLongitude, aDescription){
+var aCurStyle = GreenMarkerIcon;
+if (aDescription.lastIndexOf(")*")!=-1){aCurStyle = RedMarkerIcon;}
+var marker = new YMaps.Placemark(new YMaps.GeoPoint(aLongitude, aLatitude),
+{draggable:0,
+ hideIcon:false,
+ interactive:YMaps.Interactivity.INTERACTIVE,
+ hintOptions:{maxWidth:200, showTimeout:200,offset: new YMaps.Point(5, 5)},
+ balloonOptions:{maxWidth:200, hasCloseButton:true, mapAutoPan:1}
+});
+marker.description = aDescription;
+var MarkerStyle = new YMaps.Style();
+MarkerStyle.iconStyle = new YMaps.IconStyle();
+MarkerStyle.iconStyle.size = new YMaps.Point(10, 10); // -data-
+MarkerStyle.iconStyle.offset = new YMaps.Point(-5, -5);
+MarkerStyle.iconStyle.href = aCurStyle;
+marker.setStyle(MarkerStyle);
+map.addOverlay(marker);
+MarkerList.push(marker);
+}
+
+function yandex_RoutePack(aParams, aIndex, aWPArray){
+var params = aParams.split(FieldsDelimiter);
+var pt=new YMaps.GeoPoint(params[1],params[0]);
+var wp=null;
+for (var i=0; i<aWPArray.length; i++)
+{	if (aWPArray[i].getGeoPoint().toString()==pt.toString())
+	  {aWPArray[i].metaDataProperty.Caption=aWPArray[i].metaDataProperty.Caption+","+(aIndex+1);	
+	   aWPArray[i].description=aWPArray[i].description+'\n'+"<div class='fi80red'>\u0422\u043E\u0447\u043A\u0430\u0020\u2116"+(aIndex+1)+"</div>"+'\n'+params[2];		
+	   return;}
+}
+wp=new YMaps.WayPoint(pt);
+wp.metaDataProperty.Caption=""+(aIndex+1);
+wp.description="<div class='fi80red'>\u0422\u043E\u0447\u043A\u0430\u0020\u2116"+(aIndex+1)+"</div>"+'\n'+params[2];
+aWPArray.push(wp);	
+}
+function yandex_Route(aPoints){	
+try{	
+if (route) {map.removeOverlay(route); route=null};	
+rs = new YMaps.Style();
+rs.lineStyle = new YMaps.LineStyle();
+rs.lineStyle.strokeColor = "000000";
+rs.lineStyle.strokeWidth = 2;
+rs.hideIcon=false;
+YMaps.Styles.add("router#RouteLine", rs);
+var Pts = aPoints.split(RecordsDelimiter);
+var points = []
+var waypoints = []
+var params = [];
+var wp = null;
+for (var i=0; i<Pts.length; i++) 
+ {yandex_RoutePack(Pts[i], i, waypoints)}	
+for (var i=0; i<waypoints.length; i++) 
+ {points.push(waypoints[i].getGeoPoint())}	 
+route = new YMaps.Router(points,[],{viewAutoApply:true});
+route.setStyle(rs);
+route.metaDataProperty.Source=Pts;
+route.metaDataProperty.WayPoints=waypoints;
+YMaps.Events.observe(route, route.Events.Load, function(){
+	for (var pt=0; pt<points.length; pt++)
+    {wp = route.getWayPoint(pt);
+     wp.setStyle("default#nightSmallPoint");    
+     wp.setIconContent(waypoints[pt].metaDataProperty.Caption);
+     wp.setOptions({hideIcon:false});
+     wp.setBalloonContent(waypoints[pt].description);
+     wp.setBalloonOptions({maxWidth:200, hasCloseButton:true, mapAutoPan:1});
+    }	     
+});
+map.setZoom(17);
+map.addOverlay(route);	
+}catch(e){/*alert(e.name);*/}
+}
+function yandex_Route_NoPack(aPoints){	
+try{	
+if (route) {map.removeOverlay(route); route=null};	
+rs = new YMaps.Style();
+rs.lineStyle = new YMaps.LineStyle();
+rs.lineStyle.strokeColor = "000000";
+rs.lineStyle.strokeWidth = 2;
+rs.hideIcon=false;
+YMaps.Styles.add("router#RouteLine", rs);
+var Pts = aPoints.split(RecordsDelimiter);
+var points = []
+var waypoints = []
+var params = [];
+var wp = null;
+for (var i=0; i<Pts.length; i++) //  после 71 точки перестает приниматься стиль, после 100 перестает отображаться маршрут
+ {params=Pts[i].split(FieldsDelimiter);
+	points.push(new YMaps.GeoPoint(params[1],params[0]));
+	wp=new YMaps.WayPoint(points[i]);
+	wp.description=params[2];
+	waypoints.push(wp);}	
+route = new YMaps.Router(points,[],{viewAutoApply:true});
+route.setStyle(rs);
+route.metaDataProperty.Source=Pts;
+route.metaDataProperty.WayPoints=waypoints;
+YMaps.Events.observe(route, route.Events.Load, function(){
+	for (var pt=0; pt<points.length; pt++)
+    {wp = route.getWayPoint(pt);
+     wp.setStyle("default#nightSmallPoint");    
+     wp.setIconContent(pt+1);
+     wp.setOptions({hideIcon:false});
+     wp.setBalloonContent(waypoints[pt].description);
+     wp.setBalloonOptions({maxWidth:200, hasCloseButton:true, mapAutoPan:1});
+    }	     
+});
+map.setZoom(17);
+map.addOverlay(route);	
+}catch(e){/*alert(e.name);*/}
+}
+
+function yandex_Route_OLD2(aPoints){	
+try{	
+if (route) {map.removeOverlay(route); route=null};	
+rs = new YMaps.Style();
+rs.lineStyle = new YMaps.LineStyle();
+rs.lineStyle.strokeColor = "000000";
+rs.lineStyle.strokeWidth = 2;
+rs.hideIcon=false;
+YMaps.Styles.add("router#RouteLine", rs);
+var Pts = aPoints.split(RecordsDelimiter);
+var points = []
+var waypoints = []
+var params = [];
+var wp = null;
+for (var i=0; i<Pts.length; i++) 
+ {params=Pts[i].split(FieldsDelimiter);
+	points.push(new YMaps.GeoPoint(params[1],params[0]));
+	wp=new YMaps.WayPoint(points[i]);
+	wp.description=params[2];
+	waypoints.push(wp);}	
+route = new YMaps.Router(points,[],{viewAutoApply:true});
+//route.metaDataProperty.Source=Pts;
+//route.metaDataProperty.WayPoints=waypoints;
+YMaps.Events.observe(route, route.Events.Load, function(){
+	for (var pt=0; pt<points.length; pt++)
+    {wp = route.getWayPoint(pt);
+     wp.setStyle("default#nightSmallPoint");    
+     wp.setIconContent(pt+1);
+     wp.setOptions({hideIcon:false});
+     wp.setBalloonContent(waypoints[pt].description);
+     wp.setBalloonOptions({maxWidth:200, hasCloseButton:true, mapAutoPan:1});
+    }	     
+});
+//YMaps.Events.observe(route, route.Events.Fault, function(o, s){alert(s)});
+//YMaps.Events.observe(route, route.Events.RouteError, function(o, i){alert(i+':'+points[i]+'\n'+route.metaDataProperty.Source[i])});
+route.setStyle(rs);
+map.setZoom(17);
+map.addOverlay(route);	
+}catch(e){alert(e.name);}
+}
+
+
+function yandex_MapClick(obj, event){
+var pt=event.getCoordPoint();	
+var str = pt.getLat()+","+pt.getLng();	
+SetValueOf("ClickCoord",str);
+}
+
+// ------------------------------------------------------------------------	
+	
+function google_initialize(){
+var center = new google.maps.LatLng(gpMoscowCenter.lat, gpMoscowCenter.lng); 
+var myOptions = { 
+      zoom:13, 
+      center:center, 
+      mapTypeId:google.maps.MapTypeId.ROADMAP ,
+      maxZoom:21 ,
+      minZoom:1 ,
+      mapTypeControl:false, 
+      rotateControl:true,
+      disableDoubleClickZoom:true,
+      ZIndex:1
+    }; 	
+map = new google.maps.Map(document.getElementById("map_canvas"), myOptions); 
+map.set("streetViewControl", false);
+google.maps.event.addListener(map, "click", google_MapClick);
+} 
+
+function google_ShowInfoWindow(aText,aLatLng,aAnchor){
+if (InfoWindow) {InfoWindow.close(); InfoWindow=null}	
+var txt = aText.replace("table width=95% style","table width=100% style")
+var Opt = {content:txt,position:aLatLng,maxWidth:450,disableAutoPan:false};
+InfoWindow = new google.maps.InfoWindow(Opt);
+if (aAnchor){InfoWindow.open(map,aAnchor)} else {InfoWindow.open(map);} ;
+}
+
+function google_PolygonClick(obj){
+var polygon = this;	
+//google_ShowInfoWindow(this.metaDataProperty.Balloon,event.latLng);
+var ArrPoints = polygon.getPaths().getArray()[0].j;
+var Points = "";
+for (var i=0;i<ArrPoints.length;i++)
+ {Points = Points+'<LATLNG><LAT>'+ArrPoints[i].lat()+'</LAT><LNG>'+ArrPoints[i].lng()+'</LNG></LATLNG>\n'};
+var Result =
+'<AREA>\n'+
+'<_MODE>GOOGLE</_MODE>\n'+
+'<_INDEX>'+polygon.metaDataProperty._index+'</_INDEX>\n'+
+'<_POINTS>'+ArrPoints.length+'</_POINTS>\n'+
+'<RECORDSTATE>'+polygon.metaDataProperty.RecordState+'</RECORDSTATE>\n'+
+'<ID>'+polygon.metaDataProperty.ID+'</ID>\n'+
+'<PARENTID>'+polygon.metaDataProperty.ParentID+'</PARENTID>\n'+
+'<NAME>'+polygon.metaDataProperty.Name+'</NAME>\n'+
+'<LEVEL>'+polygon.metaDataProperty.Level+'</LEVEL>\n'+
+'<RGBLINE>'+polygon.strokeColor.substring(0,6).toUpperCase()+'</RGBLINE>\n'+
+'<RGBFILL>'+polygon.fillColor.substring(0,6).toUpperCase()+'</RGBFILL>\n'+
+'<ROUTENUM>'+polygon.metaDataProperty.RouteNum+'</ROUTENUM>\n'+
+'<DAYS>'+polygon.metaDataProperty.Days+'</DAYS>\n'+
+Points+
+'</AREA>';
+SetValueOf("AreaXML", Result)
+google_MapClick(obj);
+}
+
+function google_GetGeoPointList(aGMPointArray, GeoPoints){
+var points = [];
+var LatLon = [];
+points = aGMPointArray.split(';');
+for (var pt=0;pt<points.length;pt++){
+LatLon=points[pt].split(',');
+GeoPoints.push(new google.maps.LatLng(LatLon[0],LatLon[1]));
+}
+} 
+
+function google_CreatePolygon(aPath, aBorderColor, aFillColor, aShortDescr, aFullDescr,aID, aRecordState, aParentID, aName, aLevel, aRouteNum, aDays){
+var GeoPoints = [];
+var ind = PolygonList.length;
+var id = aID;
+var md = {
+ _index: ind ? ind : 0
+,ID: aID ? aID : 0
+,RecordState : aRecordState ? aRecordState : 0
+,ParentID : aParentID ? aParentID : 0
+,Name : aName ? aName : aFullDescr
+,Level : aLevel ? aLevel : 3   // -- \u0434\u0435\u0444\u043E\u043B\u0442\u043D\u044B\u0439 "\u0437\u043E\u043D\u0430 \u0434\u043E\u0441\u0442\u0430\u0432\u043A\u0438 \u043A\u0443\u0440\u044C\u0435\u0440\u043E\u043C"
+,RouteNum : aRouteNum ? aRouteNum : aID ? aID : 0
+,Days : aDays ? aDays : "1111111" // as array 0..6
+,LineColor: aBorderColor ? aBorderColor : "FF0000"
+,FillColor : aFillColor ? aFillColor : "FFFF00"
+,Balloon:""
+};
+md.Balloon = CreateBalloon(md);
+google_GetGeoPointList(aPath, GeoPoints);
+var Polygon;
+Polygon = new google.maps.Polygon({
+	  map:map,
+    paths: GeoPoints,
+    strokeColor: '#'+md.LineColor,
+    strokeOpacity: 0.8,
+    strokeWeight: 1,
+    fillColor: "#"+md.FillColor,
+    fillOpacity: 0.15,
+    ZIndex: 3,
+    visible:true,
+    metaDataProperty:md
+  });
+google.maps.event.addListener(Polygon, 'click', google_PolygonClick);  
+if (Polygon) {
+PolygonList.push(Polygon);
+Polygon.metaDataProperty._index = PolygonList.length-1;
+}
+}
+
+function google_PlacemarkClick(param){
+google_ShowInfoWindow(this.description,this.position,this);	
+}
+
+function google_CreateMarker(aLatitude, aLongitude, aDescription){
+//if (placemark) {placemark.setMap(null); placemark=null};	
+var latlng = new google.maps.LatLng(aLatitude, aLongitude); 
+var aCurStyle = GreenMarkerIcon;
+if (aDescription.lastIndexOf(")*")!=-1)
+{aCurStyle = RedMarkerIcon;}
+
+var marker = new google.maps.Marker(
+     {position: latlng,
+      draggable: false,
+      map:map,
+      icon:aCurStyle,
+      title:'',
+      name:'',
+      description:aDescription});
+google.maps.event.addListener(marker, "click", google_PlacemarkClick);
+MarkerList.push(marker);
+} 
+
+function google_Route(aPoints){
+if (route) {route.setMap(null); route=null};		
+maxPoints = 10; // -- max кол-во точек в маршруте (старт - 8 промежуточных - финиш) для "частников" (для "организаций" = 25 (1-23-1))
+var Pts = aPoints.split(RecordsDelimiter);
+var ll =null; // -- LatLng object
+var oneroute = []; //-- один маршрут
+var routes = []; //-- набор маршрутов точек 
+var params = [];
+var points = []; // -- waypoints (промежуточные точки)
+var start = null; 
+var finish = null;
+var str = ""
+var directionsDisplay = new google.maps.DirectionsRenderer();;
+var directionsService = [];
+var request = null;
+directionsDisplay.setMap(map);
+//directionsDisplay.setPanel(document.getElementById("googleDirectionsDisplay")); 
+//directionsDisplay.setPanel(document.getElementById("AreaXML")); 
+var p = 0; 
+var ind = 0;
+while (p<=maxPoints)
+{params=Pts[ind].split(FieldsDelimiter);
+ll=new google.maps.LatLng(Number(params[0]), Number(params[1]));
+oneroute.push(ll);
+p++;	
+if (p==maxPoints){routes.push(oneroute);oneroute=[];p=0;} 	  
+ind++;
+if (ind>=Pts.length) {if ((p<=maxPoints)&&(oneroute.length!=0)){routes.push(oneroute)}; break};} // while
+for (var rt=0; rt<routes.length;rt++)
+{oneroute=routes[rt];		
+ for (var pt=0; pt<oneroute.length; pt++)
+	{	ll = oneroute[pt]
+  if (pt==0){start=ll} else
+	if (pt==oneroute.length-1){finish=ll} else	
+	  {points.push({location:ll,stopover:true})}	//--если true, то бковки будут на маркерах}	  
+ directionsService.push(new google.maps.DirectionsService());       
+ request = {
+    origin:start,
+    destination:finish,
+    waypoints:points,
+    optimizeWaypoints:true,
+    unitSystem:google.maps.UnitSystem.METRIC,
+    travelMode: google.maps.TravelMode.DRIVING
+  };	
+ directionsService[directionsService.length-1].route(request, function(result, status) {
+    if (status == google.maps.DirectionsStatus.OK) {directionsDisplay.setDirections(result);}
+  });      		    
+ points=[];
+}//-- for pt
+}//-- for rt
+}
+
+function google_MapClick(obj){
+var pt = obj.latLng;
+var str = pt.lat()+","+pt.lng();
+SetValueOf("ClickCoord",str);
+}
+
+// ----------------------------------------------------------------------------------	
+function initialize() {
+// -- create a map	
+if (MapMode==mmYandex) {yandex_initialize();} else 
+if (MapMode==mmGoogle) {google_initialize();} else
+	 {alert('\u041D\u0435 \u043E\u043F\u0440\u0435\u0434\u0435\u043B\u0435\u043D \u0442\u0438\u043F \u043A\u0430\u0440\u0442\u044B....')}	
+ 
+var MapModeName = "";
+switch (Number(MapMode)) {
+	case mmYandex : MapModeName = "Yandex" 
+ 	         break
+ 	case mmGoogle : MapModeName = "Google" 
+ 	         break	         
+ 	default : MapModeName = "\u0422\u0438\u043F \u043A\u0430\u0440\u0442\u044B \u043D\u0435 \u043E\u043F\u0440\u0435\u043B\u0435\u043D"
+ 	         break
+  }
+// 
+}	
+
+function ClearPolygonList(){
+if (MapMode==mmGoogle)  {for (var i=PolygonList.length-1;i>=0;i--) {PolygonList[i].setMap(null)};}else
+if (MapMode==mmYandex)  {for (var i=PolygonList.length-1;i>=0;i--)map.removeOverlay(PolygonList[i]);}else
+	{}
+PolygonList=[];
+}
+
+function ClearMarkerList(){
+if (MapMode==mmGoogle)  {for (var i=MarkerList.length-1;i>=0;i--) {MarkerList[i].setMap(null)};}else
+if (MapMode==mmYandex)  {for (var i=MarkerList.length-1;i>=0;i--)map.removeOverlay(MarkerList[i]);}else
+	 {}
+MarkerList=[];
+}
+
+function SetArrayOfPolygon(aPolygons) {
+ClearPolygonList();	
+var StrPolygons = aPolygons.split(AreaDelimiter);
+var Params = []
+var ind = 0;
+var nm = "";
+var desc = "";
+for (var i=0;i<StrPolygons.length; i++){	
+Params=StrPolygons[i].split(GroupDelimiter);
+ind=i+1;
+nm ="\u0420\u0435\u0433\u0438\u043E\u043D №"+ind;
+if (Params[3]) nm=Params[3];
+desc =nm;
+if (Params[4]) desc=Params[4];
+if (MapMode==mmYandex) {yandex_CreatePolygon(Params[0],Params[1].substring(1,10),Params[2].substring(1,10),nm,desc,Params[5],Params[6],Params[7],Params[8],Params[9],Params[10],Params[11]);} else 
+if (MapMode==mmGoogle) {google_CreatePolygon(Params[0],Params[1].substring(1,10),Params[2].substring(1,10),nm,desc,Params[5],Params[6],Params[7],Params[8],Params[9],Params[10],Params[11]);} else
+	 {alert('\u041E\u0442\u043E\u0431\u0440\u0430\u0436\u0435\u043D\u0438\u0435 \u043E\u0431\u043B\u0430\u0441\u0442\u0435\u0439 : \u043D\u0435 \u043E\u043F\u0440\u0435\u0434\u0435\u043B\u0435\u043D \u0442\u0438\u043F \u043A\u0430\u0440\u0442\u044B....'); return;}	
+}
+}
+
+function CreateMarker(aLatitude,aLongitude,aDescription){
+if (MapMode==mmYandex) {yandex_CreateMarker(aLatitude,aLongitude,aDescription);} else  
+if (MapMode==mmGoogle) {google_CreateMarker(aLatitude,aLongitude,aDescription);} else
+	 {alert('\u041E\u0442\u043E\u0431\u0440\u0430\u0436\u0435\u043D\u0438\u0435 \u043C\u0430\u0440\u043A\u0435\u0440\u0430 : \u043D\u0435 \u043E\u043F\u0440\u0435\u0434\u0435\u043B\u0435\u043D \u0442\u0438\u043F \u043A\u0430\u0440\u0442\u044B....'); return;}	
+}
+
+function SetArrayOfMarker(aPoints) {
+ClearMarkerList();	
+var Pts = aPoints.split(RecordsDelimiter);
+var params = [];
+for (var i=0; i<Pts.length; i++) 
+ {params=Pts[i].split(FieldsDelimiter);
+	CreateMarker(params[0],params[1],params[2])}	
+}
+
+
+function CreateRoute(aMarkers){
+if (MapMode==mmGoogle) {google_Route(aMarkers);} else
+if (MapMode==mmYandex) {yandex_Route(aMarkers);} else 
+	 {alert('\u041E\u0442\u043E\u0431\u0440\u0430\u0436\u0435\u043D\u0438\u0435 \u043C\u0430\u0440\u043A\u0435\u0440\u0430 : \u043D\u0435 \u043E\u043F\u0440\u0435\u0434\u0435\u043B\u0435\u043D \u0442\u0438\u043F \u043A\u0430\u0440\u0442\u044B....'); return;}	
+}	
+// -------------------------------
+function CallInitialize(aMapMode){
+MapMode=aMapMode
+initialize();
+var s='\u0034\u0037\u0036\u0039\u0035\u0032\u0036\u0030\u0035\u0020\u0028\u004B\u0075\u0070\u0069\u0056\u0069\u0070\u0029\u002A\u0020'
+alert(s)
+}	
+
+
+</script> 
+</head> 
+
+<body onload="CallInitialize(0)"> 
+	<textarea name="DebugInfo" id="DebugInfo" cols="100" rows="10" wrap="off"></textarea> 
+		
+<!--<body>-->	
+<input type="hidden" id="AreaXML" value="">	<!-- описание области -->
+<input type="hidden" id="ClickCoord" value=""> <!-- координаты клика мыши -->
+<input type="hidden" id="googleDirectionsDisplay" value=""><!-- можно и не использовать в google_Route-->
+<table width=100% height=100% cellspacing="0" border="1" >
+<tr><td style="width:100%; height:100%" ><div id="map_canvas" style="width:100%; height:100%"></div></td></tr>
+</table>	
+</body>
+</html>	
+	
+	
+	

@@ -1,0 +1,15 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<BorlandProject>
+	<Transactions>
+    <Transaction>1899.12.30 00:00:00.000.203,=D:\Projects_Common\AppPrms.pas</Transaction>
+    <Transaction>1899.12.30 00:00:00.000.918,C:\Users\s.kholin.KUPIVIP\Documents\RAD Studio\Projects\Unit3.pas=D:\Projects Work\AreaEditor\U_NV_Main.pas</Transaction>
+    <Transaction>1899.12.30 00:00:00.000.455,D:\Projects Work\AreaEditor\Unit1.pas=D:\Projects Work\AreaEditor\U_NV_Types.pas</Transaction>
+    <Transaction>1899.12.30 00:00:00.000.991,C:\Users\s.kholin.KUPIVIP\Documents\RAD Studio\Projects\Project2.dproj=D:\Projects Work\AreaEditor\NavView.dproj</Transaction>
+    <Transaction>1899.12.30 00:00:00.000.563,=D:\Projects Work\AreaEditor\Unit1.pas</Transaction>
+    <Transaction>1899.12.30 00:00:00.000.258,=D:\Projects_Common\FnCommon.pas</Transaction>
+    <Transaction>1899.12.30 00:00:00.000.918,C:\Users\s.kholin.KUPIVIP\Documents\RAD Studio\Projects\Unit3.dfm=D:\Projects Work\AreaEditor\U_NV_Main.dfm</Transaction>
+    <Transaction>1899.12.30 00:00:00.000.676,=C:\Users\s.kholin.KUPIVIP\Documents\RAD Studio\Projects\Unit3.pas</Transaction>
+    <Transaction>1899.12.30 00:00:00.000.711,=C:\Users\s.kholin.KUPIVIP\Documents\RAD Studio\Projects\Unit3.pas</Transaction>
+    <Transaction>1899.12.30 00:00:00.000.987,=C:\Users\s.kholin.KUPIVIP\Documents\RAD Studio\Projects\Unit3.pas</Transaction>
+  </Transactions>
+</BorlandProject>
